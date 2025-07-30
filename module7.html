@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WayFrame | Trip Summary</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      padding: 40px;
+      color: #333;
+    }
+
+    .summary-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 800px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section h4 {
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      display: block;
+      margin: 30px auto 0;
+    }
+
+    @media print {
+      button {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="summary-container">
+    <h2>Trip Summary</h2>
+
+    <div class="section">
+      <h4>Travel Party</h4>
+      <p>Adults: 2</p>
+      <p>Children: 1</p>
+      <p>Seniors: 0</p>
+      <p>Special Needs: None</p>
+    </div>
+
+    <div class="section">
+      <h4>Trip Purpose</h4>
+      <p>Leisure and Sightseeing</p>
+    </div>
+
+    <div class="section">
+      <h4>Transportation</h4>
+      <p>Arrival: July 31, 2025 - Flight ABC123</p>
+      <p>Departure: August 5, 2025 - Flight XYZ987</p>
+    </div>
+
+    <div class="section">
+      <h4>Suggested Itinerary</h4>
+      <ul>
+        <li>August 1 - 🏖 Beach Day</li>
+        <li>August 2 - 🏛 Museum Tour</li>
+        <li>August 3 - 🥾 Hiking Adventure</li>
+        <li>August 4 - 🚶 City Walk</li>
+      </ul>
+    </div>
+
+    <button onclick="window.print()">🖨️ Print / Save as PDF</button>
+  </div>
+
+</body>
+</html>
