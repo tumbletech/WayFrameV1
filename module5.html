@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WayFrame - Module 5: Accommodation Preferences</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+      background: #f8f9fa;
+    }
+    h1 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    input[type="checkbox"],
+    input[type="radio"] {
+      margin-right: 8px;
+    }
+    select, textarea, input[type="range"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #004a99;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Module 5: Accommodation Preferences</h1>
+
+  <form action="https://your-webhook-url.com" method="POST">
+    
+    <label for="type">Type of Accommodation</label>
+    <select id="type" name="accommodation_type" multiple>
+      <option value="Hotel">Hotel</option>
+      <option value="Motel">Motel</option>
+      <option value="Bed and Breakfast">Bed & Breakfast</option>
+      <option value="Airbnb">Airbnb</option>
+      <option value="Guesthouse">Guesthouse</option>
+      <option value="Homestay">Homestay</option>
+      <option value="Hostel">Hostel</option>
+      <option value="Resort">Resort</option>
+    </select>
+
+    <label for="price">Preferred Price Range</label>
+    <select id="price" name="price_range">
+      <option value="Below 1000">Below ₱1,000</option>
+      <option value="1000-3000">₱1,000–₱3,000</option>
+      <option value="3000-6000">₱3,000–₱6,000</option>
+      <option value="6000-10000">₱6,000–₱10,000</option>
+      <option value="10000+">₱10,000+</option>
+    </select>
+
+    <label for="distance">Preferred Distance from Center</label>
+    <select id="distance" name="distance">
+      <option value="Walking">Walking distance</option>
+      <option value="1-3km">1–3 km</option>
+      <option value="3-5km">3–5 km</option>
+      <option value="Any">Doesn’t matter</option>
+    </select>
+
+    <label>Accommodation Requirements</label>
+    <input type="checkbox" name="req_wifi" value="WiFi"> WiFi<br>
+    <input type="checkbox" name="req_breakfast" value="Breakfast"> Breakfast included<br>
+    <input type="checkbox" name="req_kitchen" value="Kitchen"> Kitchen<br>
+    <input type="checkbox" name="req_parking" value="Parking"> Parking<br>
+    <input type="checkbox" name="req_pet" value="Pet Friendly"> Pet-friendly<br>
+    <input type="checkbox" name="req_pool" value="Pool"> Pool<br>
+    <input type="checkbox" name="req_aircon" value="Air Conditioning"> Air Conditioning<br>
+    <input type="checkbox" name="req_accessible" value="Accessible"> PWD Accessible<br>
+
+    <label for="notes">Additional Notes / Requests</label>
+    <textarea id="notes" name="notes" rows="4" placeholder="e.g. Near the beach, Quiet area, Ground floor..."></textarea>
+
+    <button type="submit">Next</button>
+  </form>
+
+</body>
+</html>
