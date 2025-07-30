@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WayFrame - Destination</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #f9f9f9;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 2rem;
+      padding: 1rem;
+      width: 100%;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Select Destination</h2>
+
+    <form id="destinationForm">
+      <label for="region">Region</label>
+      <select id="region" name="region" required>
+        <option value="">-- Select Region --</option>
+        <option value="Region I">Region I – Ilocos Region</option>
+        <option value="Region IV-A">Region IV-A – CALABARZON</option>
+        <option value="NCR">NCR – Metro Manila</option>
+        <option value="CAR">CAR – Cordillera Admin Region</option>
+      </select>
+
+      <label for="province">Province</label>
+      <select id="province" name="province" required>
+        <option value="">-- Select Province --</option>
+        <option value="Ilocos Norte">Ilocos Norte</option>
+        <option value="Cavite">Cavite</option>
+        <option value="Benguet">Benguet</option>
+      </select>
+
+      <label for="city">City / Town</label>
+      <select id="city" name="city" required>
+        <option value="">-- Select City/Town --</option>
+        <option value="Laoag">Laoag</option>
+        <option value="Tagaytay">Tagaytay</option>
+        <option value="Baguio">Baguio</option>
+      </select>
+
+      <button type="submit">Next</button>
+    </form>
+  </div>
+
+</body>
+</html>
