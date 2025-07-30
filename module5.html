@@ -3,98 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>WayFrame - Module 5: Accommodation Preferences</title>
+  <title>WayFrame - Module 5</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      max-width: 700px;
-      margin: auto;
-      background: #f8f9fa;
+      background-color: #f4f4f4;
     }
-    h1 {
-      text-align: center;
-    }
-    label {
-      display: block;
-      margin: 10px 0 5px;
-      font-weight: bold;
-    }
-    input[type="checkbox"],
-    input[type="radio"] {
-      margin-right: 8px;
-    }
-    select, textarea, input[type="range"] {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #0066cc;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover {
-      background-color: #004a99;
+    .form-container {
+      max-width: 600px;
+      margin: 60px auto;
+      background-color: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <div class="form-container">
+      <h2 class="mb-4 text-center">Transportation Details</h2>
+      <form>
+        <div class="mb-3">
+          <label for="mode" class="form-label">Preferred Mode of Transport</label>
+          <select class="form-select" id="mode">
+            <option value="">Select mode</option>
+            <option value="bus">Bus</option>
+            <option value="van">Van</option>
+            <option value="private">Private Vehicle</option>
+            <option value="motorcycle">Motorcycle</option>
+            <option value="carRental">Car Rental</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
 
-  <h1>Module 5: Accommodation Preferences</h1>
+        <div class="mb-3">
+          <label for="departureDate" class="form-label">Departure Date</label>
+          <input type="date" class="form-control" id="departureDate">
+        </div>
 
-  <form action="https://your-webhook-url.com" method="POST">
-    
-    <label for="type">Type of Accommodation</label>
-    <select id="type" name="accommodation_type" multiple>
-      <option value="Hotel">Hotel</option>
-      <option value="Motel">Motel</option>
-      <option value="Bed and Breakfast">Bed & Breakfast</option>
-      <option value="Airbnb">Airbnb</option>
-      <option value="Guesthouse">Guesthouse</option>
-      <option value="Homestay">Homestay</option>
-      <option value="Hostel">Hostel</option>
-      <option value="Resort">Resort</option>
-    </select>
+        <div class="mb-3">
+          <label for="returnDate" class="form-label">Return Date</label>
+          <input type="date" class="form-control" id="returnDate">
+        </div>
 
-    <label for="price">Preferred Price Range</label>
-    <select id="price" name="price_range">
-      <option value="Below 1000">Below ₱1,000</option>
-      <option value="1000-3000">₱1,000–₱3,000</option>
-      <option value="3000-6000">₱3,000–₱6,000</option>
-      <option value="6000-10000">₱6,000–₱10,000</option>
-      <option value="10000+">₱10,000+</option>
-    </select>
+        <div class="mb-3">
+          <label for="pickupLocation" class="form-label">Pick-up Location</label>
+          <input type="text" class="form-control" id="pickupLocation" placeholder="e.g. Shell Brookside, Aurora Blvd.">
+        </div>
 
-    <label for="distance">Preferred Distance from Center</label>
-    <select id="distance" name="distance">
-      <option value="Walking">Walking distance</option>
-      <option value="1-3km">1–3 km</option>
-      <option value="3-5km">3–5 km</option>
-      <option value="Any">Doesn’t matter</option>
-    </select>
+        <div class="mb-3">
+          <label for="dropoffLocation" class="form-label">Drop-off Location</label>
+          <input type="text" class="form-control" id="dropoffLocation" placeholder="e.g. Laoag Central Terminal">
+        </div>
 
-    <label>Accommodation Requirements</label>
-    <input type="checkbox" name="req_wifi" value="WiFi"> WiFi<br>
-    <input type="checkbox" name="req_breakfast" value="Breakfast"> Breakfast included<br>
-    <input type="checkbox" name="req_kitchen" value="Kitchen"> Kitchen<br>
-    <input type="checkbox" name="req_parking" value="Parking"> Parking<br>
-    <input type="checkbox" name="req_pet" value="Pet Friendly"> Pet-friendly<br>
-    <input type="checkbox" name="req_pool" value="Pool"> Pool<br>
-    <input type="checkbox" name="req_aircon" value="Air Conditioning"> Air Conditioning<br>
-    <input type="checkbox" name="req_accessible" value="Accessible"> PWD Accessible<br>
-
-    <label for="notes">Additional Notes / Requests</label>
-    <textarea id="notes" name="notes" rows="4" placeholder="e.g. Near the beach, Quiet area, Ground floor..."></textarea>
-
-    <button type="submit">Next</button>
-  </form>
-
+        <button type="submit" class="btn btn-primary w-100">Next</button>
+      </form>
+    </div>
+  </div>
 </body>
 </html>
