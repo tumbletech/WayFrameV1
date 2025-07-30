@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WayFrame | Travel Schedule</title>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f8f9fa;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    #external-events {
+      width: 200px;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      float: left;
+      margin-right: 20px;
+    }
+
+    .fc-event {
+      cursor: move;
+    }
+
+    .external-event {
+      margin: 10px 0;
+      padding: 8px;
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    #calendar {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Travel Schedule Planner</h2>
+
+  <div id="external-events">
+    <p><strong>Drag Destinations</strong></p>
+    <div class='external-event' data-title="Beach Trip">🏖 Beach Trip</div>
+    <div class='external-event' data-title="Museum Tour">🏛 Museum Tour</div>
+    <div class='external-event' data-title="Hiking Adventure">🥾 Hiking Adventure</div>
+    <div class='external-event' data-title="City Walk">🚶 City Walk</div>
+  </div>
+
+  <div id='calendar'></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const draggableEls = document.querySelectorAll('.external-event');
+
+      draggableEls.forEach(el => {
+        new FullCalendar.Draggable(el, {
+          itemSelector: '.external-event',
+          eventData: function () {
+            return {
+              title: el.getAttribute('data-title')
+            };
+          }
+        });
+      });
+
+      const calendarEl = document.getElementById('calendar');
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        droppable: true,
+        editable: true,
+        initialView: 'dayGridMonth',
+        height: 'auto',
+        events: [],
+        drop: function (info) {
+          // Optional feedback or behavior after drop
+        }
+      });
+
+      calendar.render();
+    });
+  </script>
+
+</body>
+</html>
