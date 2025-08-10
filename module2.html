@@ -92,16 +92,48 @@
     </div>
 
     <script>
-      window.onload = function () {
-        const name = localStorage.getItem("userName");
-        const email = localStorage.getItem("userEmail");
-    
+      // --- Guard: must come from Module 1 ---
+      window.addEventListener('load', () => {
+        const name = localStorage.getItem('userName');
+        const email = localStorage.getItem('userEmail');
         if (!name || !email) {
           alert("Please start at the beginning.");
           window.location.href = "index.html";
+          return;
         }
-      };
+    
+        // Prefill destination if user came back
+        const saved = JSON.parse(localStorage.getItem('wf_destination') || '{}');
+        if (saved.region) document.getElementById('region').value = saved.region;
+        if (saved.province) document.getElementById('province').value = saved.province;
+        if (saved.city) document.getElementById('city').value = saved.city;
+      });
+    
+      // --- Handle submit, store data, set progress, go to Module 3 ---
+      document.getElementById('destinationForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+    
+        const region = document.getElementById('region').value;
+        const province = document.getElementById('province').value;
+        const city = document.getElementById('city').value;
+    
+        if (!region || !province || !city) {
+          alert('Please complete Region, Province, and City/Town.');
+          return;
+        }
+    
+        // Save destination
+        localStorage.setItem('wf_destination', JSON.stringify({ region, province, city }));
+    
+        // Update progress token
+        const progress = JSON.parse(localStorage.getItem('wf_progress') || '{}');
+        localStorage.setItem('wf_progress', JSON.stringify({ ...progress, m2: true }));
+    
+        // Move to Module 3
+        window.location.href = 'module3.html';
+      });
     </script>
+
 
   
   </body>
