@@ -1,66 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>WayFrame - Destination</title>
-    <style>
-      body {
-        font-family: sans-serif;
-        padding: 2rem;
-        background: #f9f9f9;
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WayFrame - Destination (Module 2)</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <style>
+    :root {
+      --bg: #f9f9f9;
+      --panel: #ffffff;
+      --primary: #007bff;
+      --primary-dark: #0056b3;
+      --muted: #6c757d;
+      --shadow: 0 10px 30px rgba(0,0,0,.12);
+      --radius: 14px;
+    }
+    html, body { height:100%; margin:0; background: var(--bg); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    #map { position: fixed; inset: 0; }
+
+    /* Overlay panel */
+    .panel {
+      position: fixed;
+      right: 24px;
+      top: 24px;
+      width: 420px;
+      max-width: calc(100% - 48px);
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #eee;
+    }
+    .panel-header h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+    .tabs {
+      display: flex; gap: 6px; padding: .75rem 1.25rem 0 1.25rem;
+    }
+    .tab {
+      flex: 1; text-align: center; padding: .5rem .75rem; cursor: pointer; user-select: none;
+      border-radius: 999px; border: 1px solid #e5e7eb; background: #f8fafc; font-weight: 600; font-size: .9rem;
+    }
+    .tab.active { background: #e7f1ff; border-color: #cfe2ff; color: #0b5ed7; }
+
+    .panel-body {
+      padding: 1rem 1.25rem 1.25rem 1.25rem;
+      display: none;
+    }
+    .panel-body.active { display: block; }
+
+    label { display:block; margin-top: .85rem; font-weight: 600; font-size: .92rem; }
+    select, input[type="text"] {
+      width: 100%; padding: .8rem; margin-top: .4rem;
+      border-radius: 8px; border: 1px solid #cfd6e4; outline: none;
+    }
+    .hint { color: var(--muted); font-size: .85rem; margin-top: .35rem; }
+
+    .actions {
+      display: flex; gap: .6rem; padding: .9rem 1.25rem 1.25rem 1.25rem;
+    }
+    .btn {
+      flex: 1; padding: .85rem 1rem; border: none; border-radius: 10px; cursor: pointer; font-weight: 700;
+    }
+    .btn-secondary { background: #e9ecef; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    .pill {
+      display:inline-flex; align-items:center; gap:.5rem;
+      background:#f1f5f9; border:1px solid #e2e8f0; border-radius:999px; padding:.35rem .7rem;
+      font-size:.85rem; color:#0f172a;
+    }
+
+    .inline {
+      display:flex; gap:.6rem; align-items:center; margin-top:.75rem; flex-wrap: wrap;
+    }
+
+    /* Mobile = bottom sheet */
+    @media (max-width: 720px) {
+      .panel {
+        left: 0; right: 0; bottom: 0; top: auto;
+        width: 100%; max-width: 100%;
+        border-radius: 16px 16px 0 0;
       }
-  
-      .container {
-        max-width: 500px;
-        margin: auto;
-        background: #fff;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      }
-  
-      h2 {
-        text-align: center;
-        margin-bottom: 1.5rem;
-      }
-  
-      label {
-        display: block;
-        margin-top: 1rem;
-        font-weight: bold;
-      }
-  
-      select {
-        width: 100%;
-        padding: 0.8rem;
-        margin-top: 0.5rem;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-      }
-  
-      button {
-        margin-top: 2rem;
-        padding: 1rem;
-        width: 100%;
-        background: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-size: 1rem;
-        cursor: pointer;
-      }
-  
-      button:hover {
-        background: #0056b3;
-      }
-    </style>
-  </head>
-  <body>
-  
-    <div class="container">
+      .panel-header { cursor: grab; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <div class="panel" role="dialog" aria-modal="true" aria-label="Select Destination">
+    <div class="panel-header">
       <h2>Select Destination</h2>
-  
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" id="tab-dropdowns">Use dropdowns</div>
+      <div class="tab" id="tab-map">Pick on map</div>
+    </div>
+
+    <!-- DROPDOWNS MODE -->
+    <div class="panel-body active" id="body-dropdowns">
       <form id="destinationForm">
         <label for="region">Region</label>
         <select id="region" name="region" required>
@@ -70,71 +124,258 @@
           <option value="NCR">NCR – Metro Manila</option>
           <option value="CAR">CAR – Cordillera Admin Region</option>
         </select>
-  
+
         <label for="province">Province</label>
         <select id="province" name="province" required>
           <option value="">-- Select Province --</option>
-          <option value="Ilocos Norte">Ilocos Norte</option>
-          <option value="Cavite">Cavite</option>
-          <option value="Benguet">Benguet</option>
+          <option value="Ilocos Norte" data-region="Region I">Ilocos Norte</option>
+          <option value="Cavite" data-region="Region IV-A">Cavite</option>
+          <option value="Benguet" data-region="CAR">Benguet</option>
         </select>
-  
+
         <label for="city">City / Town</label>
         <select id="city" name="city" required>
           <option value="">-- Select City/Town --</option>
-          <option value="Laoag">Laoag</option>
-          <option value="Tagaytay">Tagaytay</option>
-          <option value="Baguio">Baguio</option>
+          <option value="Laoag" data-province="Ilocos Norte">Laoag</option>
+          <option value="Tagaytay" data-province="Cavite">Tagaytay</option>
+          <option value="Baguio" data-province="Benguet">Baguio</option>
         </select>
-  
-        <button type="submit">Next</button>
+
+        <div class="inline">
+          <span class="pill" id="dropdownStatus">Status: Not set</span>
+          <button class="btn btn-secondary" type="button" id="resetDropdowns">Reset</button>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Next</button>
+        </div>
       </form>
     </div>
 
-    <script>
-      // --- Guard: must come from Module 1 ---
-      window.addEventListener('load', () => {
-        const name = localStorage.getItem('userName');
-        const email = localStorage.getItem('userEmail');
-        if (!name || !email) {
-          alert("Please start at the beginning.");
-          window.location.href = "index.html";
-          return;
-        }
-    
-        // Prefill destination if user came back
-        const saved = JSON.parse(localStorage.getItem('wf_destination') || '{}');
-        if (saved.region) document.getElementById('region').value = saved.region;
-        if (saved.province) document.getElementById('province').value = saved.province;
-        if (saved.city) document.getElementById('city').value = saved.city;
-      });
-    
-      // --- Handle submit, store data, set progress, go to Module 3 ---
-      document.getElementById('destinationForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-    
-        const region = document.getElementById('region').value;
-        const province = document.getElementById('province').value;
-        const city = document.getElementById('city').value;
-    
-        if (!region || !province || !city) {
-          alert('Please complete Region, Province, and City/Town.');
-          return;
-        }
-    
-        // Save destination
-        localStorage.setItem('wf_destination', JSON.stringify({ region, province, city }));
-    
-        // Update progress token
-        const progress = JSON.parse(localStorage.getItem('wf_progress') || '{}');
-        localStorage.setItem('wf_progress', JSON.stringify({ ...progress, m2: true }));
-    
-        // Move to Module 3
-        window.location.href = 'module3.html';
-      });
-    </script>
+    <!-- MAP MODE -->
+    <div class="panel-body" id="body-map">
+      <p class="hint">Tap on the map to set your destination. We’ll drop a pin and try to detect the city/province.</p>
 
+      <div class="inline">
+        <span class="pill" id="coordPill">No point selected</span>
+        <button class="btn btn-secondary" type="button" id="recenterPH">Re-center PH</button>
+      </div>
 
-  
-  </body>
+      <label for="mapCity">City / Town (auto-filled; you can edit)</label>
+      <input type="text" id="mapCity" placeholder="e.g., Tagaytay"/>
+
+      <label for="mapProvince">Province</label>
+      <input type="text" id="mapProvince" placeholder="e.g., Cavite"/>
+
+      <label for="mapRegion">Region</label>
+      <input type="text" id="mapRegion" placeholder="e.g., Region IV-A"/>
+
+      <p class="hint">If auto-fill fails, you can type them. Your coordinates are still saved.</p>
+
+      <div class="actions">
+        <button class="btn btn-primary" type="button" id="confirmMapChoice">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Guard: must pass Module 1 ----------
+    (function guard() {
+      const name = localStorage.getItem('userName');
+      const email = localStorage.getItem('userEmail');
+      if (!name || !email) {
+        alert("Please start at the beginning.");
+        window.location.href = "index.html";
+      }
+    })();
+
+    // ---------- Leaflet Map ----------
+    const map = L.map('map', { zoomControl: true });
+    const PH_CENTER = [12.8797, 121.7740]; // Philippines centroid-ish
+    map.setView(PH_CENTER, 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    let marker = null;
+    let selectedLatLng = null;
+
+    map.on('click', async (e) => {
+      selectedLatLng = e.latlng;
+      if (marker) map.removeLayer(marker);
+      marker = L.marker(selectedLatLng).addTo(map);
+      updateCoordPill();
+
+      // Try reverse geocode (best-effort). If it fails, user can type.
+      try {
+        const info = await reverseGeocode(selectedLatLng.lat, selectedLatLng.lng);
+        if (info) {
+          document.getElementById('mapCity').value = info.city || info.town || info.village || '';
+          document.getElementById('mapProvince').value = info.state || info.county || '';
+          document.getElementById('mapRegion').value = info.region || '';
+        }
+      } catch (_) { /* silent */ }
+    });
+
+    function updateCoordPill() {
+      const pill = document.getElementById('coordPill');
+      if (!selectedLatLng) {
+        pill.textContent = 'No point selected';
+      } else {
+        const { lat, lng } = selectedLatLng;
+        pill.textContent = `Selected: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      }
+    }
+
+    function reverseGeocode(lat, lon) {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`;
+      return fetch(url, { headers: { 'Accept': 'application/json' } })
+        .then(r => r.ok ? r.json() : null)
+        .then(j => j ? j.address : null);
+    }
+
+    document.getElementById('recenterPH').onclick = () => {
+      map.setView(PH_CENTER, 6);
+    };
+
+    // ---------- Tabs ----------
+    const tabDropdowns = document.getElementById('tab-dropdowns');
+    const tabMap = document.getElementById('tab-map');
+    const bodyDropdowns = document.getElementById('body-dropdowns');
+    const bodyMap = document.getElementById('body-map');
+
+    tabDropdowns.addEventListener('click', () => {
+      tabDropdowns.classList.add('active');
+      tabMap.classList.remove('active');
+      bodyDropdowns.classList.add('active');
+      bodyMap.classList.remove('active');
+    });
+    tabMap.addEventListener('click', () => {
+      tabMap.classList.add('active');
+      tabDropdowns.classList.remove('active');
+      bodyMap.classList.add('active');
+      bodyDropdowns.classList.remove('active');
+    });
+
+    // ---------- Dropdown dependencies (simple filter on sample data) ----------
+    const regionSel = document.getElementById('region');
+    const provinceSel = document.getElementById('province');
+    const citySel = document.getElementById('city');
+    const statusSpan = document.getElementById('dropdownStatus');
+
+    function refreshProvinceOptions() {
+      const region = regionSel.value;
+      [...provinceSel.options].forEach((opt, i) => {
+        if (i === 0) return; // keep placeholder
+        const show = !region || opt.dataset.region === region;
+        opt.hidden = !show;
+      });
+      provinceSel.value = '';
+      citySel.value = '';
+      refreshCityOptions();
+    }
+    function refreshCityOptions() {
+      const prov = provinceSel.value;
+      [...citySel.options].forEach((opt, i) => {
+        if (i === 0) return;
+        const show = !prov || opt.dataset.province === prov;
+        opt.hidden = !show;
+      });
+      citySel.value = '';
+      reflectDropdownStatus();
+    }
+    function reflectDropdownStatus() {
+      const r = regionSel.value || '—';
+      const p = provinceSel.value || '—';
+      const c = citySel.value || '—';
+      statusSpan.textContent = `Status: ${r} / ${p} / ${c}`;
+    }
+
+    regionSel.addEventListener('change', refreshProvinceOptions);
+    provinceSel.addEventListener('change', refreshCityOptions);
+    citySel.addEventListener('change', reflectDropdownStatus);
+    document.getElementById('resetDropdowns').onclick = () => {
+      regionSel.value = '';
+      refreshProvinceOptions();
+      reflectDropdownStatus();
+    };
+
+    // Prefill if returning
+    (function prefill() {
+      const saved = JSON.parse(localStorage.getItem('wf_destination') || '{}');
+      if (!saved) return;
+
+      if (saved.region) regionSel.value = saved.region;
+      refreshProvinceOptions();
+      if (saved.province) provinceSel.value = saved.province;
+      refreshCityOptions();
+      if (saved.city) citySel.value = saved.city;
+      reflectDropdownStatus();
+
+      // Map pick state
+      if (saved.lat && saved.lng) {
+        selectedLatLng = L.latLng(saved.lat, saved.lng);
+        marker = L.marker(selectedLatLng).addTo(map);
+        map.setView(selectedLatLng, 12);
+        updateCoordPill();
+        document.getElementById('mapCity').value = saved.city || '';
+        document.getElementById('mapProvince').value = saved.province || '';
+        document.getElementById('mapRegion').value = saved.region || '';
+      }
+    })();
+
+    // ---------- Submit (Dropdowns path) ----------
+    document.getElementById('destinationForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const region = regionSel.value;
+      const province = provinceSel.value;
+      const city = citySel.value;
+
+      if (!region || !province || !city) {
+        alert('Please complete Region, Province, and City/Town.');
+        return;
+      }
+
+      saveAndGo({
+        region, province, city,
+        // clear coordinates if user used dropdowns exclusively
+        lat: selectedLatLng ? selectedLatLng.lat : null,
+        lng: selectedLatLng ? selectedLatLng.lng : null,
+        method: 'dropdowns'
+      });
+    });
+
+    // ---------- Confirm (Map path) ----------
+    document.getElementById('confirmMapChoice').addEventListener('click', () => {
+      if (!selectedLatLng) {
+        alert('Tap on the map to choose a point first.');
+        return;
+      }
+      const city = (document.getElementById('mapCity').value || '').trim();
+      const province = (document.getElementById('mapProvince').value || '').trim();
+      const region = (document.getElementById('mapRegion').value || '').trim();
+
+      if (!city || !province || !region) {
+        // We still allow proceeding with coords-only, but give a nudge.
+        if (!confirm('City/Province/Region are empty. Proceed with coordinates only?')) return;
+      }
+
+      saveAndGo({
+        region: region || null,
+        province: province || null,
+        city: city || null,
+        lat: selectedLatLng.lat,
+        lng: selectedLatLng.lng,
+        method: 'map'
+      });
+    });
+
+    function saveAndGo(dest) {
+      localStorage.setItem('wf_destination', JSON.stringify(dest));
+      const progress = JSON.parse(localStorage.getItem('wf_progress') || '{}');
+      localStorage.setItem('wf_progress', JSON.stringify({ ...progress, m2: true }));
+      window.location.href = 'module3.html';
+    }
+  </script>
+</body>
 </html>
