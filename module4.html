@@ -1,418 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>WayFrame – Module 4: Accommodation Picker</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>WayFrame | Available Stays</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
     <style>
-      :root{
-        --bg:#f7f8fb; --card:#fff; --ink:#0f172a; --muted:#5b6475; --line:#e6eaf2;
-        --primary:#1677ff; --primary-600:#0f62d6; --accent:#eff6ff; --ok:#16a34a;
-        --radius:16px; --radius-sm:12px; --shadow:0 10px 30px rgba(0,0,0,.08);
-      }
-      *{ box-sizing:border-box }
-      html,body{ margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:var(--bg); color:var(--ink) }
-  
-      .wrap{ max-width:1100px; margin:0 auto; padding: clamp(12px,2vw,24px) }
-      header.top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px }
-      .crumbs{ font-size:.9rem; color:var(--muted) }
-      .dest{ display:flex; gap:10px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:999px; padding:8px 12px }
-      .dest .dot{ width:10px; height:10px; border-radius:50%; background:var(--primary) }
-  
-      .layout{ display:grid; grid-template-columns: 290px 1fr; gap:16px }
-      @media (max-width: 900px){ .layout{ grid-template-columns: 1fr } }
-  
-      .card{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow) }
-      .side{ padding:14px }
-      .side h3{ margin:0 0 8px 0; font-size:1rem }
-  
-      .field{ margin-top:10px }
-      .field label{ display:block; font-size:.9rem; color:#334155; margin-bottom:6px; font-weight:600 }
-      .field input[type="number"], .field input[type="text"], .field select{
-        width:100%; height:40px; border:1px solid var(--line); border-radius:10px; padding:0 10px; outline:none; font-size:.95rem; background:#fff;
-      }
-      .row{ display:flex; gap:10px }
-      .actions{ display:flex; gap:10px; margin-top:12px }
-      .btn{ height:40px; border:none; border-radius:10px; padding:0 14px; font-weight:700; cursor:pointer }
-      .btn-primary{ background:var(--primary); color:#fff }
-      .btn-primary:hover{ background:var(--primary-600) }
-      .btn-light{ background:#eef2f7 }
-  
-      .results{ padding:10px }
-      .toolbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border-bottom:1px solid var(--line) }
-      .toolbar .count{ color:var(--muted); font-size:.9rem }
-  
-      .grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; padding:12px }
-      @media (max-width: 1100px){ .grid{ grid-template-columns: repeat(2, 1fr) } }
-      @media (max-width: 640px){ .grid{ grid-template-columns: 1fr } }
-  
-      .stay{ border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff; display:flex; flex-direction:column }
-      .stay .img{ aspect-ratio: 16/10; background:#e5e7eb; object-fit:cover; width:100% }
-      .stay .meta{ padding:10px 12px; display:grid; gap:6px }
-      .stay .name{ font-weight:700 }
-      .stay .row{ justify-content:space-between }
-      .price{ font-weight:800 }
-      .badge{ display:inline-flex; align-items:center; gap:6px; padding:4px 8px; background:var(--accent); color:#0b5ed7; border-radius:999px; font-size:.8rem }
-  
-      .foot{ display:flex; gap:8px; padding:10px 12px 12px 12px; margin-top:auto }
-  
-      .empty{ padding:24px; text-align:center; color:var(--muted) }
+      body{background:#f5f7fb}
+      .card{border-radius:16px}
+      .badge-dot{background:#e9f5eb;color:#237a3b;border:1px solid #cde9d6}
+      .pill{background:#eef5ff;color:#0b5ed7;border:1px solid #cfe2ff;border-radius:999px;padding:.25rem .5rem;font-weight:600}
+      .muted{color:#6b7280}
+      .thumb{width:100%;height:160px;object-fit:cover;border-radius:12px}
+      .sticky-top{top:0.75rem !important}
     </style>
   </head>
   <body>
-    <div class="wrap">
-      <header class="top">
-        <div class="crumbs">WayFrame &rsaquo; Module 4 &ndash; Accommodations</div>
-        <div class="dest"><span class="dot"></span><span id="destText">Destination: —</span></div>
-      </header>
-  
-      <section class="layout">
-        <!-- Filters / Controls -->
-        <aside class="card side">
-          <h3>Filters</h3>
-          <div class="field">
-            <label for="fType">Type</label>
-            <select id="fType">
-              <option value="">Any</option>
-              <option>Hotel</option>
-              <option>Hostel</option>
-              <option>Guesthouse</option>
-              <option>Resort</option>
-              <option>Apartment</option>
-              <option>Homestay</option>
-            </select>
+    <div class="container py-3">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div>
+          <h1 class="h5 mb-1">Available Stays</h1>
+          <div id="destLine" class="muted small"></div>
+        </div>
+        <a href="module4.html" class="pill text-decoration-none">Edit filters</a>
+      </div>
+    
+      <div class="row g-3">
+        <!-- Filters summary / helper -->
+        <div class="col-12 col-lg-3">
+          <div class="card p-3 sticky-top">
+            <div class="fw-semibold mb-2">Your criteria</div>
+            <div id="crit" class="small"></div>
+            <hr>
+            <small class="text-muted">
+              Accommodation data sourced from the
+              <a href="https://tourism.gov.ph/accreditations/accredited" target="_blank">Philippines Department of Tourism</a>.
+            </small>
           </div>
-          <div class="row">
-            <div class="field" style="flex:1">
-              <label for="fPriceMin">Min Price / night (₱)</label>
-              <input type="number" id="fPriceMin" placeholder="0" min="0" step="100">
-            </div>
-            <div class="field" style="flex:1">
-              <label for="fPriceMax">Max Price / night (₱)</label>
-              <input type="number" id="fPriceMax" placeholder="5000" min="0" step="100">
-            </div>
-          </div>
-          <div class="row">
-            <div class="field" style="flex:1">
-              <label for="fBeds">Beds</label>
-              <select id="fBeds">
-                <option value="">Any</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3+</option>
-              </select>
-            </div>
-            <div class="field" style="flex:1">
-              <label for="fRoom">Room size (m²)</label>
-              <select id="fRoom">
-                <option value="">Any</option>
-                <option value="lt20">&lt; 20</option>
-                <option value="20-30">20&ndash;30</option>
-                <option value="30-40">30&ndash;40</option>
-                <option value="gt40">&gt; 40</option>
-              </select>
-            </div>
-          </div>
-          <div class="actions">
-            <button class="btn btn-light" id="btnReset" type="button">Reset</button>
-            <button class="btn btn-primary" id="btnApply" type="button">Apply</button>
-          </div>
-        </aside>
-  
+        </div>
+    
         <!-- Results -->
-        <section class="card results">
-          <div class="toolbar">
-            <div class="count" id="count">Loading&hellip;</div>
-            <div>
-              <select id="sort">
-                <option value="pop">Sort: Popular</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="rating-desc">Rating: High to Low</option>
-              </select>
-            </div>
-          </div>
-          <div class="grid" id="grid"></div>
-          <div class="empty" id="empty" style="display:none">No results. Try changing filters.</div>
-        </section>
-      </section>
+        <div class="col-12 col-lg-9">
+          <div id="list" class="row g-3"></div>
+          <div id="empty" class="text-center text-muted py-5 d-none">No matches. Try widening your price or type.</div>
+        </div>
+      </div>
     </div>
-  
+    
     <script>
-      // -------------------- ENV / DATA ADAPTER --------------------
-      // Pick ONE strategy. For v1 we default to LOCAL_JSON (Option 7)
-      const WF_DATA_STRATEGY = 'LOCAL_JSON'; // 'LOCAL_JSON' | 'SHEET_WEBHOOK' | 'FIREBASE'
-  
-      // If using Google Sheets -> n8n webhook, paste the webhook URL here
-      const WF_SHEET_WEBHOOK_URL = '';
-  
-      // If using Firebase later, expose config via window.WF_FIREBASE = { ... } and set strategy to 'FIREBASE'
-  
-      // -------------------- MODEL --------------------
-      /** Expected stay item shape
-       * id: string
-       * name: string
-       * type: 'Hotel'|'Hostel'|'Guesthouse'|'Resort'|'Apartment'|'Homestay'|string
-       * pricePerNight: number (in PHP)
-       * rating: number (0-5)
-       * beds: number
-       * roomSize: number (m2)
-       * coords: { lat:number, lng:number }
-       * city: string, province: string, region: string
-       * photos: [url]
-       * deeplink?: string (to vendor page for booking)
-       */
-  
-      // -------------------- ADAPTERS --------------------
-      async function fetchStays(params){
-        if (WF_DATA_STRATEGY === 'LOCAL_JSON') return fetchLocal(params);
-        if (WF_DATA_STRATEGY === 'SHEET_WEBHOOK') return fetchSheetWebhook(params);
-        if (WF_DATA_STRATEGY === 'FIREBASE') return fetchFirebase(params);
-        return [];
+      // --- Read context ---
+      const dest = JSON.parse(localStorage.getItem('wf_destination') || '{}');
+      const crit = JSON.parse(localStorage.getItem('wf_accomCriteria') || '{}');
+    
+      // Guard
+      if (!dest || (!dest.city && !dest.lat)) {
+        alert('Please pick a destination first.');
+        location.href = 'module2.html';
       }
-  
-      async function fetchLocal(params){
-        // Place a file at /data/accommodations.json following the shape above
-        // For quick demo we bundle a small inline fallback
-        try{
-          const r = await fetch('/data/accommodations.json', { cache:'no-store' });
-          if (!r.ok) throw new Error('no file');
-          const all = await r.json();
-          return filterSort(all, params);
-        }catch(e){
-          const mock = [
-            { id:'m1', name:'Seaside Inn', type:'Guesthouse', pricePerNight:1800, rating:4.3, beds:2, roomSize:24, city:'Tagaytay', province:'Cavite', region:'Region IV-A', coords:{lat:14.1,lng:120.9}, photos:['https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1200&auto=format&fit=crop'] },
-            { id:'m2', name:'Skyline Hotel', type:'Hotel', pricePerNight:3800, rating:4.7, beds:1, roomSize:28, city:'Tagaytay', province:'Cavite', region:'Region IV-A', coords:{lat:14.12,lng:120.95}, photos:['https://images.unsplash.com/photo-1551776235-dde6d4829808?q=80&w=1200&auto=format&fit=crop'] },
-            { id:'m3', name:'Baguio Pines Lodge', type:'Hotel', pricePerNight:2600, rating:4.4, beds:2, roomSize:22, city:'Baguio', province:'Benguet', region:'CAR', coords:{lat:16.41,lng:120.59}, photos:['https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=1200&auto=format&fit=crop'] },
-            { id:'m4', name:'Laoag Budget Hostel', type:'Hostel', pricePerNight:950, rating:4.0, beds:1, roomSize:14, city:'Laoag', province:'Ilocos Norte', region:'Region I', coords:{lat:18.20,lng:120.59}, photos:['https://images.unsplash.com/photo-1551888419-cf53b2315b1f?q=80&w=1200&auto=format&fit=crop'] },
-            { id:'m5', name:'El Nido Bay Resort', type:'Resort', pricePerNight:5200, rating:4.6, beds:2, roomSize:36, city:'El Nido', province:'Palawan', region:'MIMAROPA', coords:{lat:11.20,lng:119.40}, photos:['https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200&auto=format&fit=crop'] },
-          ];
-          return filterSort(mock, params);
-        }
-      }
-  
-      async function fetchSheetWebhook(params){
-        if (!WF_SHEET_WEBHOOK_URL){
-          console.warn('WF_SHEET_WEBHOOK_URL is empty; falling back to local.');
-          return fetchLocal(params);
-        }
-        const r = await fetch(WF_SHEET_WEBHOOK_URL, {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(params)
-        });
-        const data = await r.json();
-        return filterSort(data, params);
-      }
-  
-      async function fetchFirebase(params){
-        if (!window.WF_FIREBASE){
-          console.warn('WF_FIREBASE config missing; falling back to local.');
-          return fetchLocal(params);
-        }
-        // Lazy-load Firebase when you’re ready to switch
-        // Example placeholder – replace with actual Firebase SDK calls
-        return fetchLocal(params);
-      }
-  
-      // -------------------- FILTER / SORT --------------------
-      function filterSort(list, params){
-        let out = list.filter(x => matchArea(x, params));
-        const { type, priceMin, priceMax, beds, room } = params.filters;
-        if (type) out = out.filter(x => (x.type||'').toLowerCase() === type.toLowerCase());
-        if (priceMin != null) out = out.filter(x => +x.pricePerNight >= +priceMin);
-        if (priceMax != null && priceMax !== '') out = out.filter(x => +x.pricePerNight <= +priceMax);
-        if (beds) out = out.filter(x => +x.beds >= (beds==='3' ? 3 : +beds));
-        if (room){
-          out = out.filter(x => {
-            const s = +x.roomSize || 0;
-            if (room==='lt20') return s < 20;
-            if (room==='20-30') return s >=20 && s < 30;
-            if (room==='30-40') return s >=30 && s < 40;
-            if (room==='gt40') return s >= 40;
-            return true;
-          });
-        }
-  
-        // Sort
-        const sort = params.sort;
-        if (sort === 'price-asc') out.sort((a,b)=> (a.pricePerNight||0)-(b.pricePerNight||0));
-        else if (sort === 'price-desc') out.sort((a,b)=> (b.pricePerNight||0)-(a.pricePerNight||0));
-        else if (sort === 'rating-desc') out.sort((a,b)=> (b.rating||0)-(a.rating||0));
-        // 'pop' default – keep original order
-  
-        return out;
-      }
-  
-      function matchArea(x, params){
-        const d = params.destination || {}; // {city, province, region}
-        // Loose match: prefer city if present, else province, else region
-        if (d.city) return (x.city||'').toLowerCase() === d.city.toLowerCase();
-        if (d.province) return (x.province||'').toLowerCase() === d.province.toLowerCase();
-        if (d.region) return (x.region||'').toLowerCase() === d.region.toLowerCase();
-        return true;
-      }
-  
-      // -------------------- UI BINDING --------------------
-      const elGrid = document.getElementById('grid');
-      const elCount = document.getElementById('count');
-      const elDest = document.getElementById('destText');
-  
-      const elType = document.getElementById('fType');
-      const elMin = document.getElementById('fPriceMin');
-      const elMax = document.getElementById('fPriceMax');
-      const elBeds = document.getElementById('fBeds');
-      const elRoom = document.getElementById('fRoom');
-      const elSort = document.getElementById('sort');
-      const elReset = document.getElementById('btnReset');
-      const elApply = document.getElementById('btnApply');
-  
-      const destination = JSON.parse(localStorage.getItem('wf_destination')||'{}');
-      elDest.textContent = `Destination: ${destination.city||destination.province||destination.region||'—'}`;
-  
-      let cache = [];
-  
-      async function load(){
-        elCount.textContent = 'Loading…';
-        const params = getParams();
-        cache = await fetchStays(params);
-        render(cache);
-      }
-  
-      function getParams(){
-        return {
-          destination,
-          sort: elSort.value,
-          filters: {
-            type: elType.value,
-            priceMin: elMin.value ? +elMin.value : null,
-            priceMax: elMax.value ? +elMax.value : null,
-            beds: elBeds.value,
-            room: elRoom.value,
+    
+      // Header lines
+      const destLine = document.getElementById('destLine');
+      destLine.textContent = `Near ${dest.city || 'your pin'}${dest.province ? ', ' + dest.province : ''}${dest.region ? ', ' + dest.region : ''}`;
+    
+      const critBox = document.getElementById('crit');
+      critBox.innerHTML = `
+        <div><strong>Type:</strong> ${crit.type || 'Any'}</div>
+        <div><strong>Max price:</strong> ${crit.maxPrice ? toPeso(crit.maxPrice) : 'Any'}</div>
+        <div><strong>Room size:</strong> ${crit.roomSize || 'Any'}</div>
+        <div><strong>Beds:</strong> ${crit.beds || 'Any'}</div>
+      `;
+    
+      // --- Data adapter (swap to n8n webhook later) ---
+      async function fetchStays() {
+        // V1: local mock. Replace with fetch('https://YOUR-N8N-WEBHOOK') for live.
+        // Expected shape per item:
+        // { id, name, type, city, province, region, lat, lng, pricePerNight, beds, roomSize, amenities, photoUrl, bookingUrl, contact, dotAccredited:true }
+        const data = [
+          {
+            id:"el-nido-01", name:"Cadlao Resort", type:"Resort", city:"El Nido", province:"Palawan", region:"MIMAROPA",
+            lat:11.196, lng:119.406, pricePerNight:4500, beds:2, roomSize:"Double",
+            amenities:"Pool; Beachfront; WiFi", photoUrl:"https://images.unsplash.com/photo-1501117716987-c8e1ecb2101f?q=80&w=1200&auto=format&fit=crop",
+            bookingUrl:"https://www.cadlaoresort.com/", contact:"+63 912 345 6789", dotAccredited:true
+          },
+          {
+            id:"baguio-01", name:"Hotel Elizabeth", type:"Hotel", city:"Baguio", province:"Benguet", region:"CAR",
+            lat:16.418, lng:120.613, pricePerNight:3200, beds:2, roomSize:"Double",
+            amenities:"Breakfast; Parking; WiFi", photoUrl:"https://images.unsplash.com/photo-1502920917128-1aa500764b8a?q=80&w=1200&auto=format&fit=crop",
+            bookingUrl:"https://www.hotelelizabeth.com.ph/", contact:"+63 74 442 1111", dotAccredited:true
+          },
+          {
+            id:"tagaytay-01", name:"Taal Vista Hotel", type:"Hotel", city:"Tagaytay", province:"Cavite", region:"CALABARZON",
+            lat:14.110, lng:120.933, pricePerNight:5800, beds:2, roomSize:"Suite",
+            amenities:"View; Pool; WiFi", photoUrl:"https://images.unsplash.com/photo-1488747279002-c8523379faaa?q=80&w=1200&auto=format&fit=crop",
+            bookingUrl:"https://www.taalvistahotel.com/", contact:"+63 46 413 1000", dotAccredited:true
           }
-        }
+        ];
+        return data;
       }
-  
-      function peso(n){
-        if (n==null) return '—';
-        return new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:0}).format(n);
+    
+      // --- Helpers ---
+      function toPeso(n){ return '₱' + Number(n).toLocaleString('en-PH'); }
+      function haversineKm(a, b){
+        if (!a || !b || a.lat==null || a.lng==null || b.lat==null || b.lng==null) return null;
+        const R=6371, d2r=Math.PI/180;
+        const dLat=(b.lat-a.lat)*d2r, dLng=(b.lng-a.lng)*d2r;
+        const s1=Math.sin(dLat/2), s2=Math.sin(dLng/2);
+        const aa=s1*s1 + Math.cos(a.lat*d2r)*Math.cos(b.lat*d2r)*s2*s2;
+        return R*2*Math.atan2(Math.sqrt(aa), Math.sqrt(1-aa));
       }
-  
-      function render(list){
-        elGrid.innerHTML = '';
-        const total = list.length;
-        elCount.textContent = total ? `${total} place${total>1?'s':''} found` : 'No places found';
-        document.getElementById('empty').style.display = total? 'none':'block';
-        for (const x of list){
-          const card = document.createElement('article');
-          card.className = 'stay';
-          const img = (x.photos && x.photos[0]) || 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1200&auto=format&fit=crop';
-          card.innerHTML = `
-            <img class="img" src="${img}" alt="${escapeHtml(x.name)}">
-            <div class="meta">
-              <div class="name">${escapeHtml(x.name)}</div>
-              <div class="row">
-                <span class="badge">${escapeHtml(x.type||'Stay')}</span>
-                <span class="price">${peso(x.pricePerNight)}/night</span>
-              </div>
-              <div class="row" style="color:var(--muted); font-size:.9rem">
-                <span>⭐ ${x.rating||'—'}</span>
-                <span>${x.beds||'—'} bed(s) • ${x.roomSize||'—'} m²</span>
-              </div>
-            </div>
-            <div class="foot">
-              <button class="btn btn-light" onclick="viewOnMap(${x.coords?.lat||'null'}, ${x.coords?.lng||'null'})">Map</button>
-              ${x.deeplink ? `<a class="btn btn-light" href="${x.deeplink}" target="_blank" rel="noopener">View</a>` : ''}
-              <button class="btn btn-primary" onclick='addToPlan(${JSON.stringify(x).replace(/"/g,"&quot;")})'>Add to Plan</button>
-            </div>
-          `;
-          elGrid.appendChild(card);
-        }
-      }
-  
-      function escapeHtml(s){ return String(s||'').replace(/[&<>"]g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])) }
-  
-      window.viewOnMap = function(lat,lng){
-        if (!lat || !lng){ alert('No map coordinates available for this listing.'); return; }
-        // For v1: open Google Maps
-        window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
-      }
-  
-      window.addToPlan = function(item){
-        // Store under trips -> stays (localStorage for now; Firestore later)
-        const tripId = ensureTrip();
-        const key = `wf_trip_${tripId}_stays`;
-        const arr = JSON.parse(localStorage.getItem(key)||'[]');
-        const entry = {
-          id: item.id,
-          name: item.name,
-          pricePerNight: item.pricePerNight||0,
-          nights: 1,
-          subtotal: item.pricePerNight||0,
-          coords: item.coords||null,
-          city: item.city||null,
-          province: item.province||null,
-          region: item.region||null,
-          type: item.type||'Stay',
-          addedAt: new Date().toISOString(),
-        };
-        arr.push(entry);
-        localStorage.setItem(key, JSON.stringify(arr));
-        toast(`${entry.name} added to plan`);
-      }
-  
-      function ensureTrip(){
-        // Create a lightweight trip id once per session
-        let id = localStorage.getItem('wf_trip_id');
-        if (!id){ id = 't'+Math.random().toString(36).slice(2,8); localStorage.setItem('wf_trip_id', id); }
-        return id;
-      }
-  
-      function toast(msg){
-        let t = document.getElementById('wf_toast');
-        if (!t){
-          t = document.createElement('div');
-          t.id = 'wf_toast';
-          t.style.cssText = 'position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:9999;opacity:0;transition:opacity .2s';
-          document.body.appendChild(t);
-        }
-        t.textContent = msg;
-        t.style.opacity = '1';
-        setTimeout(()=> t.style.opacity='0', 1400);
-      }
-  
-      // Apply / Reset
-      elApply.addEventListener('click', load);
-      elSort.addEventListener('change', load);
-      elReset.addEventListener('click', ()=>{
-        elType.value = '';
-        elMin.value = '';
-        elMax.value = '';
-        elBeds.value = '';
-        elRoom.value = '';
-        elSort.value = 'pop';
-        load();
-      });
-  
-      // Init
-      (function init(){
-        // Guard: make sure Module 2 ran
-        const name = localStorage.getItem('userName');
-        const email = localStorage.getItem('userEmail');
-        const dest = localStorage.getItem('wf_destination');
-        if (!name || !email || !dest){
-          alert('Please start at the beginning.');
-          window.location.href = 'index.html';
+    
+      // --- Render ---
+      (async function init(){
+        const stays = await fetchStays();
+    
+        // Filter using criteria (type, price, beds, roomSize, and destination proximity if city present)
+        const filtered = stays.filter(s => {
+          if (crit.type && s.type !== crit.type) return false;
+          if (crit.maxPrice && s.pricePerNight && s.pricePerNight > crit.maxPrice) return false;
+          if (crit.beds && s.beds && s.beds < crit.beds) return false;
+          if (crit.roomSize && s.roomSize && s.roomSize !== crit.roomSize) return false;
+    
+          // (Optional) If destination city is set, prefer same city; otherwise allow all
+          if (dest.city && s.city && s.city.toLowerCase() !== dest.city.toLowerCase()) {
+            // keep, but will sort by distance later
+          }
+          // Only list DOT-accredited (your rule)
+          if (s.dotAccredited !== true) return false;
+          return true;
+        }).map(s => {
+          // compute distance if we have coords
+          s._distanceKm = (dest.lat && dest.lng && s.lat && s.lng)
+            ? haversineKm({lat:dest.lat,lng:dest.lng},{lat:s.lat,lng:s.lng})
+            : null;
+          return s;
+        }).sort((a,b)=>{
+          // Sort by distance first (if available), else by price
+          if (a._distanceKm!=null && b._distanceKm!=null) return a._distanceKm - b._distanceKm;
+          if (a._distanceKm!=null) return -1;
+          if (b._distanceKm!=null) return 1;
+          return (a.pricePerNight||Infinity) - (b.pricePerNight||Infinity);
+        });
+    
+        renderList(filtered);
+      })();
+    
+      function renderList(items){
+        const list = document.getElementById('list');
+        const empty = document.getElementById('empty');
+        list.innerHTML = '';
+    
+        if (!items.length){
+          empty.classList.remove('d-none');
           return;
         }
-        // Progress mark
-        const progress = JSON.parse(localStorage.getItem('wf_progress')||'{}');
-        localStorage.setItem('wf_progress', JSON.stringify({ ...progress, m4: true }));
-  
-        load();
-      })();
+        empty.classList.add('d-none');
+    
+        items.forEach(s => {
+          const km = s._distanceKm!=null ? `${s._distanceKm.toFixed(1)} km away` : (s.city ? s.city : '');
+          const price = s.pricePerNight ? toPeso(s.pricePerNight) + '/night' : '—';
+          const dot = s.dotAccredited ? `<span class="badge badge-dot ms-2">DOT Accredited</span>` : '';
+          const photo = s.photoUrl || 'https://via.placeholder.com/800x500?text=WayFrame';
+    
+          const col = document.createElement('div');
+          col.className = 'col-12';
+          col.innerHTML = `
+            <div class="card p-3">
+              <div class="row g-3 align-items-center">
+                <div class="col-12 col-md-4">
+                  <img class="thumb" src="${photo}" alt="${s.name}">
+                </div>
+                <div class="col-12 col-md-8">
+                  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <h2 class="h6 mb-0">${s.name}${dot}</h2>
+                    <div class="muted small">${km}</div>
+                  </div>
+                  <div class="small mt-1">${s.type}${s.amenities ? ' • ' + s.amenities : ''}</div>
+                  <div class="mt-2 fw-semibold">${price}</div>
+                  <div class="d-flex gap-2 mt-3 flex-wrap">
+                    ${s.bookingUrl ? `<a class="btn btn-outline-primary btn-sm" href="${s.bookingUrl}" target="_blank" rel="noopener">Check availability</a>` : ''}
+                    <button class="btn btn-primary btn-sm" data-id="${s.id}">Add to plan</button>
+                  </div>
+                  <div class="small muted mt-2">${s.contact ? 'Contact: ' + s.contact : ''}</div>
+                </div>
+              </div>
+            </div>
+          `;
+          // Add handler for Add to plan
+          col.querySelector('button.btn-primary').addEventListener('click', ()=> addToPlan(s));
+          list.appendChild(col);
+        });
+      }
+    
+      function addToPlan(stay){
+        // Store minimal info for Module 6 summary; you can later write to Firestore
+        const arr = JSON.parse(localStorage.getItem('wf_stays') || '[]');
+        arr.push({
+          id: stay.id,
+          name: stay.name,
+          city: stay.city,
+          pricePerNight: stay.pricePerNight || null,
+          lat: stay.lat || null,
+          lng: stay.lng || null,
+          addedAt: Date.now()
+        });
+        localStorage.setItem('wf_stays', JSON.stringify(arr));
+    
+        // Mark progress and give lightweight feedback
+        const progress = JSON.parse(localStorage.getItem('wf_progress') || '{}');
+        localStorage.setItem('wf_progress', JSON.stringify({ ...progress, m4_added: true }));
+    
+        alert(`Added "${stay.name}" to your plan.`);
+      }
     </script>
   </body>
 </html>
