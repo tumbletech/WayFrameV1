@@ -14,50 +14,86 @@
   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
   <style>
-    :root {
-      --bg:#f9f9f9; --panel:#fff; --primary:#007bff; --primary-dark:#0056b3;
-      --muted:#6c757d; --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.12);
+    :root{
+      --bg:#f9f9fb; --panel:#fff; --primary:#1677ff; --primary-dark:#0f62d6;
+      --muted:#6b7280; --line:#e5e7eb; --shadow:0 10px 30px rgba(0,0,0,.12);
+      --radius:16px; --radius-sm:12px; --padX:16px; --padY:14px;
     }
-    html, body { height:100%; margin:0; background:var(--bg); font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
-    #map { position:fixed; inset:0; }
+    *{ box-sizing:border-box }
+    html,body{ height:100%; margin:0; background:var(--bg); font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif }
 
-    .panel {
-      position:fixed; right:24px; top:24px; width:420px; max-width:calc(100% - 48px);
+    /* Map */
+    #map{ position:fixed; inset:0 }
+
+    /* Panel */
+    .panel{
+      position:fixed; z-index:1000;
+      right: clamp(12px, 3vw, 24px);
+      top: clamp(12px, 3vw, 24px);
+      width: min(440px, calc(100% - 24px));
       background:var(--panel); border-radius:var(--radius); box-shadow:var(--shadow);
-      display:flex; flex-direction:column; overflow:hidden; transition:height 0.25s ease;
+      overflow:hidden; transition:height .25s ease;
     }
-    .panel-header {
-      padding:1rem 1.25rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;
+    .panel-header{
+      padding: 12px var(--padX);
+      border-bottom:1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between;
     }
-    .panel-header h2 { margin:0; font-size:1.1rem; }
-    .panel-header button {
-      border:none; background:none; font-size:1.2rem; cursor:pointer; line-height:1;
-    }
-    .panel-body { padding:1rem 1.25rem 1.25rem; }
-    .panel.collapsed { height:48px; }
-    .panel.collapsed .panel-body { display:none; }
+    .panel-header h2{ margin:0; font-size:1.05rem; letter-spacing:.2px }
+    .panel-header button{ border:none; background:none; font-size:1.2rem; cursor:pointer; line-height:1 }
 
-    label { display:block; margin-top:.85rem; font-weight:600; font-size:.92rem; }
-    input[type="text"] {
-      width:100%; padding:.8rem; margin-top:.4rem; border-radius:8px; border:1px solid #cfd6e4; outline:none;
-    }
-    .hint { color:var(--muted); font-size:.85rem; margin-top:.35rem; }
-    .pill {
-      display:inline-flex; align-items:center; gap:.5rem; background:#f1f5f9; border:1px solid #e2e8f0;
-      border-radius:999px; padding:.35rem .7rem; font-size:.85rem; color:#0f172a;
-    }
-    .inline { display:flex; gap:.6rem; align-items:center; margin:.75rem 0; flex-wrap:wrap; }
-    .actions { display:flex; gap:.6rem; padding:.9rem 0 0 0; }
-    .btn { flex:1; padding:.9rem 1rem; border:none; border-radius:10px; cursor:pointer; font-weight:700; }
-    .btn-primary { background:var(--primary); color:#fff; }
-    .btn-primary:hover { background:var(--primary-dark); }
-    .btn-secondary { background:#e9ecef; }
+    .panel-body{ padding: 10px var(--padX) 14px var(--padX) }
+    .panel.collapsed{ height:48px }
+    .panel.collapsed .panel-body{ display:none }
 
-    @media (max-width: 720px) {
-      .panel { left:0; right:0; bottom:0; top:auto; width:100%; border-radius:16px 16px 0 0; }
+    /* Fields */
+    .field{ margin-top:10px }
+    label{ display:block; font-size:.92rem; font-weight:600; margin-bottom:6px }
+    input[type="text"]{
+      width:100%;
+      height: 42px;
+      padding: 0 12px;
+      border:1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background:#fff;
+      outline:none;
+      font-size:.98rem;
     }
+    input[type="text"]::placeholder{ color:#9ca3af }
+    input[type="text"]:focus{ border-color:#cbd5e1; box-shadow:0 0 0 3px rgba(22,119,255,.08) }
 
-    .leaflet-control-geocoder-form input { min-width: 220px; }
+    .hint{ color:var(--muted); font-size:.86rem; margin-top:6px }
+
+    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:10px 0 }
+    .pill{
+      display:inline-flex; align-items:center; padding:6px 10px; gap:6px;
+      background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; font-size:.86rem; color:#111827;
+    }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:100%; height:44px; border:none; border-radius:12px; cursor:pointer; font-weight:700;
+    }
+    .btn-primary{ background:var(--primary); color:#fff }
+    .btn-primary:hover{ background:var(--primary-dark) }
+    .btn-secondary{ background:#eef2f7; color:#111827 }
+
+    /* Geocoder control spacing so it doesn't hide behind panel */
+    .leaflet-top.leaflet-left{ top: 12px }
+    .leaflet-control-geocoder-form input{ min-width: 210px }
+
+    /* Mobile bottom sheet */
+    @media (max-width: 720px){
+      .panel{
+        left: env(safe-area-inset-left);
+        right: env(safe-area-inset-right);
+        bottom: env(safe-area-inset-bottom);
+        top: auto;
+        width: auto;
+        border-radius: 16px 16px 0 0;
+      }
+      .panel-body{ padding: 10px 14px 16px 14px }
+      .row{ gap:8px }
+    }
   </style>
 </head>
 <body>
@@ -67,26 +103,33 @@
   <div class="panel" role="dialog" aria-modal="true" aria-label="Select Destination">
     <div class="panel-header">
       <h2>Select Destination</h2>
-      <button id="togglePanel" title="Minimize">&#x25BC;</button>
+      <button id="togglePanel" title="Minimize" aria-label="Toggle panel">&#x25BC;</button>
     </div>
-    <div class="panel-body">
-      <p class="hint">Search or tap the map to set your destination. We’ll drop a pin and auto-fill details. You can still edit them.</p>
 
-      <div class="inline">
-        <span class="pill" id="coordPill">No point selected</span>
-        <button class="btn btn-secondary" type="button" id="recenterPH">Re-center PH</button>
+    <div class="panel-body">
+      <p class="hint">Search or tap the map to set your destination. We’ll drop a pin and auto‑fill details. You can still edit them.</p>
+
+      <div class="row">
+        <span class="pill" id="coordPill">Selected: —</span>
+        <button class="btn btn-secondary" type="button" id="recenterPH" style="width:auto; padding:0 14px; height:36px; border-radius:10px;">Re-center PH</button>
       </div>
 
-      <label for="city">City / Town</label>
-      <input type="text" id="city" placeholder="e.g., Tagaytay"/>
+      <div class="field">
+        <label for="city">City / Town</label>
+        <input type="text" id="city" placeholder="e.g., Tagaytay">
+      </div>
 
-      <label for="province">Province</label>
-      <input type="text" id="province" placeholder="e.g., Cavite"/>
+      <div class="field">
+        <label for="province">Province</label>
+        <input type="text" id="province" placeholder="e.g., Cavite">
+      </div>
 
-      <label for="region">Region</label>
-      <input type="text" id="region" placeholder="e.g., CALABARZON (Region IV-A)"/>
+      <div class="field">
+        <label for="region">Region</label>
+        <input type="text" id="region" placeholder="e.g., CALABARZON (Region IV‑A)">
+      </div>
 
-      <div class="actions">
+      <div class="field" style="margin-top:14px">
         <button class="btn btn-primary" type="button" id="nextBtn">Next</button>
       </div>
     </div>
@@ -108,14 +151,15 @@
     const map = L.map('map', { zoomControl: true }).setView(PH_CENTER, 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
 
-    // Search control
+    // Geocoder (search)
     const geocoder = L.Control.geocoder({ defaultMarkGeocode: false }).addTo(map);
     geocoder.on('markgeocode', function(e) {
-      const center = e.geocode.center;
-      map.fitBounds(e.geocode.bbox);
+      const { center, bbox } = e.geocode;
+      map.fitBounds(bbox);
       setMarker(center.lat, center.lng, true);
     });
 
+    // Marker + state
     let marker = null;
     let selected = null;
     function setMarker(lat, lng, doReverse = true) {
@@ -126,14 +170,14 @@
       if (doReverse) reverseGeocode(lat, lng).then(fillFields).catch(()=>{});
     }
     function updateCoordPill(){
-      document.getElementById('coordPill').textContent = selected
-        ? `Selected: ${selected.lat.toFixed(5)}, ${selected.lng.toFixed(5)}`
-        : 'No point selected';
+      const pill = document.getElementById('coordPill');
+      pill.textContent = selected ? `Selected: ${selected.lat.toFixed(5)}, ${selected.lng.toFixed(5)}` : 'Selected: —';
     }
 
     map.on('click', (e)=> setMarker(e.latlng.lat, e.latlng.lng, true));
     document.getElementById('recenterPH').onclick = ()=> map.setView(PH_CENTER, 6);
 
+    // Reverse geocode
     function reverseGeocode(lat, lon){
       const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
       return fetch(url).then(r => r.ok ? r.json() : Promise.reject())
@@ -148,6 +192,7 @@
         addr.region || addr.state_district || document.getElementById('region').value;
     }
 
+    // Prefill on return
     (function prefill(){
       const saved = JSON.parse(localStorage.getItem('wf_destination') || '{}');
       if (!saved) return;
@@ -160,11 +205,9 @@
       }
     })();
 
+    // Next
     document.getElementById('nextBtn').onclick = () => {
-      if (!selected) {
-        alert('Tap the map or search to choose a point first.');
-        return;
-      }
+      if (!selected) { alert('Tap the map or search to choose a point first.'); return; }
       const city = document.getElementById('city').value.trim();
       const province = document.getElementById('province').value.trim();
       const region = document.getElementById('region').value.trim();
@@ -174,16 +217,11 @@
       }
 
       localStorage.setItem('wf_destination', JSON.stringify({
-        city: city || null,
-        province: province || null,
-        region: region || null,
-        lat: selected.lat,
-        lng: selected.lng,
-        method: 'map'
+        city: city || null, province: province || null, region: region || null,
+        lat: selected.lat, lng: selected.lng, method: 'map'
       }));
       const progress = JSON.parse(localStorage.getItem('wf_progress') || '{}');
       localStorage.setItem('wf_progress', JSON.stringify({ ...progress, m2: true }));
-
       window.location.href = 'module3.html';
     };
 
