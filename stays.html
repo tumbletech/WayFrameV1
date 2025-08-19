@@ -14,10 +14,7 @@
   .thumb{width:100%;height:160px;object-fit:cover;border-radius:12px;background:linear-gradient(135deg,#e5ecff,#f5f7fb)}
   .sticky-top{top:0.75rem !important}
   .hotel-name{word-break:break-word}
-  .fab-next{
-    position:fixed; right:18px; bottom:18px; z-index:1050;
-    box-shadow:0 10px 24px rgba(0,0,0,.15); border-radius:999px; padding:.9rem 1.2rem;
-  }
+  .fab-next{position:fixed; right:18px; bottom:18px; z-index:1050; box-shadow:0 10px 24px rgba(0,0,0,.15); border-radius:999px; padding:.9rem 1.2rem;}
   .fab-next[disabled]{opacity:.6; pointer-events:none}
 </style>
 </head>
@@ -126,8 +123,6 @@
           <label class="form-label">Notes</label>
           <textarea id="bkNotes" class="form-control" rows="2" placeholder="Special requests, etc."></textarea>
         </div>
-
-        <!-- Disclaimer placeholder (we’ll add copy later) -->
       </form>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -152,10 +147,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // ----- Config -----
-  const MAKE_WEBHOOK = "https://hook.eu2.make.com/qp6e8tzwf1or6fy2ifyog53twiwwr25h";
+  // ===== Config =====
+  // Paste the EXACT URL of your Make (Integromat) Custom Webhook here:
+  const MAKE_WEBHOOK = "https://hook.eu2.make.com/REPLACE_WITH_YOUR_WEBHOOK_ID";
 
-  // ----- Read destination + criteria -----
+  // ===== Read destination + criteria =====
   const dest = JSON.parse(localStorage.getItem('wf_destination') || '{}');
   const crit = JSON.parse(localStorage.getItem('wf_accomCriteria') || '{}');
 
@@ -199,8 +195,10 @@
     note.textContent = `Showing establishments in ${regionKey}.`;
   }
 
-  // ----- Fetch from Make webhook -----
+  // ===== Fetch from Make webhook =====
   (async function loadStays(){
+    const loading = document.getElementById('loading');
+    const errorBox = document.getElementById('errorBox');
     try{
       const url = new URL(MAKE_WEBHOOK);
       if (regionKey) url.searchParams.set('region', regionKey);
@@ -222,20 +220,18 @@
         city: r.City || r.city || '',
         province: r.Province || r.province || ''
       }))
-      // strict region match on client too (in case webhook is open)
       .filter(h => !regionKey || h.region === regionKey)
-      // optional type filter (category match)
-      .filter(h => !crit.type || (h.category || '').toLowerCase() === crit.type.toLowerCase());
+      .filter(h => !crit.type || (h.category || '').toLowerCase() === (crit.type || '').toLowerCase());
 
       renderList(cleaned);
     }catch(e){
       console.error(e);
-      document.getElementById('errorBox').classList.remove('d-none');
-      document.getElementById('loading').classList.add('d-none');
+      errorBox.classList.remove('d-none');
+      loading.classList.add('d-none');
     }
   })();
 
-  // ----- Render -----
+  // ===== Render =====
   function renderList(items){
     const loading = document.getElementById('loading');
     const list = document.getElementById('list');
@@ -345,13 +341,10 @@
   function openPendingModal(){
     const pending = getPending();
     if (!pending) { alert('No booking in progress. Click “Check availability” first.'); return; }
-
-    // Minimal hotel object for modal context
     const hotel = { name: pending.name, category: 'Hotel', region: regionKey };
     openBookingModal(hotel);
     setVal('bkLink', pending.url);
 
-    // Try to prefill dates from URL if present
     try {
       const u = new URL(pending.url);
       const ci = u.searchParams.get('checkin') || u.searchParams.get('arrival') || u.searchParams.get('in');
@@ -368,7 +361,7 @@
     showBookedBanner(false);
   }
 
-  // ---- Booking modal logic (reuses earlier functions) ----
+  // ---- Booking modal logic ----
   const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
   const hotelNameHidden = document.getElementById('hotelNameHidden');
   const hotelContext = document.getElementById('hotelContext');
@@ -421,7 +414,6 @@
     const base = {
       name,
       region: regionKey,
-      // rating/category/validity are optional here; we’re mainly storing booking
       addedAt: Date.now(),
       booking
     };
@@ -433,10 +425,6 @@
     bookingModal.hide();
     updateSelectionCount();
     syncNextButton();
-    // re-render summary lines (cheap approach: refresh list UI by simulating)
-    document.querySelectorAll('#list .btn-success, #list .btn-primary').forEach(btn=>{
-      // noop; you can re-fetch if you want, but typically not needed here
-    });
   });
 
   function summaryLine(bk){
