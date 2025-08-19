@@ -1,462 +1,462 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>WayFrame | Available Stays</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
-<style>
-  body{background:#f5f7fb}
-  .card{border-radius:16px}
-  .badge-dot{background:#e9f5eb;color:#237a3b;border:1px solid #cde9d6}
-  .pill{background:#eef5ff;color:#0b5ed7;border:1px solid #cfe2ff;border-radius:999px;padding:.25rem .6rem;font-weight:600}
-  .muted{color:#6b7280}
-  .thumb{width:100%;height:160px;object-fit:cover;border-radius:12px;background:linear-gradient(135deg,#e5ecff,#f5f7fb)}
-  .sticky-top{top:0.75rem !important}
-  .hotel-name{word-break:break-word}
-  .fab-next{position:fixed; right:18px; bottom:18px; z-index:1050; box-shadow:0 10px 24px rgba(0,0,0,.15); border-radius:999px; padding:.9rem 1.2rem;}
-  .fab-next[disabled]{opacity:.6; pointer-events:none}
-</style>
-</head>
-<body>
-<div class="container py-3">
-
-  <!-- Header -->
-  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-    <div>
-      <h1 class="h5 mb-1">Available Stays</h1>
-      <div id="destLine" class="muted small"></div>
-    </div>
-    <a href="module4.html" class="pill text-decoration-none">Edit filters</a>
-  </div>
-
-  <div class="row g-3">
-    <!-- Sidebar -->
-    <div class="col-12 col-lg-3">
-      <div class="card p-3 sticky-top">
-        <div class="fw-semibold mb-2">Your criteria</div>
-        <div id="crit" class="small"></div>
-        <hr>
-        <small class="text-muted">
-          Establishments are from your curated DOT list in Google Sheets.
-        </small>
-        <hr>
-        <div class="small"><strong>Selected:</strong> <span id="selCount">0</span> stay(s)</div>
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>WayFrame | Available Stays</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <style>
+      body{background:#f5f7fb}
+      .card{border-radius:16px}
+      .badge-dot{background:#e9f5eb;color:#237a3b;border:1px solid #cde9d6}
+      .pill{background:#eef5ff;color:#0b5ed7;border:1px solid #cfe2ff;border-radius:999px;padding:.25rem .6rem;font-weight:600}
+      .muted{color:#6b7280}
+      .thumb{width:100%;height:160px;object-fit:cover;border-radius:12px;background:linear-gradient(135deg,#e5ecff,#f5f7fb)}
+      .sticky-top{top:0.75rem !important}
+      .hotel-name{word-break:break-word}
+      .fab-next{position:fixed; right:18px; bottom:18px; z-index:1050; box-shadow:0 10px 24px rgba(0,0,0,.15); border-radius:999px; padding:.9rem 1.2rem;}
+      .fab-next[disabled]{opacity:.6; pointer-events:none}
+    </style>
+  </head>
+  <body>
+    <div class="container py-3">
+    
+      <!-- Header -->
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div>
+          <h1 class="h5 mb-1">Available Stays</h1>
+          <div id="destLine" class="muted small"></div>
+        </div>
+        <a href="module4.html" class="pill text-decoration-none">Edit filters</a>
+      </div>
+    
+      <div class="row g-3">
+        <!-- Sidebar -->
+        <div class="col-12 col-lg-3">
+          <div class="card p-3 sticky-top">
+            <div class="fw-semibold mb-2">Your criteria</div>
+            <div id="crit" class="small"></div>
+            <hr>
+            <small class="text-muted">
+              Establishments are from your curated DOT list in Google Sheets.
+            </small>
+            <hr>
+            <div class="small"><strong>Selected:</strong> <span id="selCount">0</span> stay(s)</div>
+          </div>
+        </div>
+    
+        <!-- Results -->
+        <div class="col-12 col-lg-9">
+          <div id="scopeNote" class="alert alert-info py-2 px-3 small d-none"></div>
+    
+          <div id="loading" class="text-center text-muted py-5">
+            <div class="spinner-border" role="status" aria-hidden="true"></div>
+            <div class="mt-2">Loading stays…</div>
+          </div>
+    
+          <div id="list" class="row g-3 d-none"></div>
+          <div id="empty" class="text-center text-muted py-5 d-none">No stays match your destination.</div>
+          <div id="errorBox" class="alert alert-danger mt-3 d-none">Couldn’t load stays. Please try again.</div>
+        </div>
       </div>
     </div>
-
-    <!-- Results -->
-    <div class="col-12 col-lg-9">
-      <div id="scopeNote" class="alert alert-info py-2 px-3 small d-none"></div>
-
-      <div id="loading" class="text-center text-muted py-5">
-        <div class="spinner-border" role="status" aria-hidden="true"></div>
-        <div class="mt-2">Loading stays…</div>
-      </div>
-
-      <div id="list" class="row g-3 d-none"></div>
-      <div id="empty" class="text-center text-muted py-5 d-none">No stays match your destination.</div>
-      <div id="errorBox" class="alert alert-danger mt-3 d-none">Couldn’t load stays. Please try again.</div>
-    </div>
-  </div>
-</div>
-
-<!-- Add/Edit Booking Modal -->
-<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable">
-    <div class="modal-content" style="border-radius:16px">
-      <div class="modal-header">
-        <h5 class="modal-title" id="bookingModalTitle">Add to plan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form id="bookingForm" class="modal-body">
-        <input type="hidden" id="hotelNameHidden">
-        <div class="mb-2"><small class="text-muted" id="hotelContext"></small></div>
-
-        <div class="row g-2 mb-2">
-          <div class="col-12 col-md-6">
-            <label class="form-label">Status</label>
-            <select id="bkStatus" class="form-select">
-              <option value="planned">Planned</option>
-              <option value="booked">Booked</option>
-              <option value="tentative">Tentative</option>
-            </select>
+    
+    <!-- Add/Edit Booking Modal -->
+    <div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius:16px">
+          <div class="modal-header">
+            <h5 class="modal-title" id="bookingModalTitle">Add to plan</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="col-6">
-            <label class="form-label">Check-in</label>
-            <input type="date" id="bkIn" class="form-control">
-          </div>
-          <div class="col-6">
-            <label class="form-label">Check-out</label>
-            <input type="date" id="bkOut" class="form-control">
-          </div>
-        </div>
-
-        <div class="row g-2 mb-2">
-          <div class="col-6">
-            <label class="form-label">Guests</label>
-            <input type="number" id="bkGuests" min="1" class="form-control" value="2">
-          </div>
-          <div class="col-6">
-            <label class="form-label">Rooms</label>
-            <input type="number" id="bkRooms" min="1" class="form-control" value="1">
-          </div>
-        </div>
-
-        <div class="row g-2 mb-2">
-          <div class="col-6">
-            <label class="form-label">Confirm #</label>
-            <input type="text" id="bkConf" class="form-control" placeholder="Optional">
-          </div>
-          <div class="col-6">
-            <label class="form-label">Total Price</label>
-            <input type="number" id="bkPrice" class="form-control" placeholder="₱">
-          </div>
-        </div>
-
-        <div class="mb-2">
-          <label class="form-label">Booking link</label>
-          <input type="url" id="bkLink" class="form-control" placeholder="https://…">
-        </div>
-
-        <div class="mb-2">
-          <label class="form-label">Notes</label>
-          <textarea id="bkNotes" class="form-control" rows="2" placeholder="Special requests, etc."></textarea>
-        </div>
-      </form>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" id="saveBookingBtn" class="btn btn-primary">Save to plan</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- “Done booking?” banner -->
-<div id="bookedBanner" class="alert alert-primary d-flex align-items-center gap-2"
-     style="position:fixed; left:12px; right:12px; bottom:12px; z-index:1100; display:none; border-radius:12px;">
-  <div>Done booking? Add the details so they appear in your trip summary.</div>
-  <div class="ms-auto">
-    <button class="btn btn-primary btn-sm" onclick="openPendingModal()">I booked it</button>
-    <button class="btn btn-outline-secondary btn-sm" onclick="dismissPending()">Dismiss</button>
-  </div>
-</div>
-
-<!-- Next button -->
-<button id="nextBtn" class="btn btn-primary fab-next" disabled>Next → Transport</button>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // ===== Config =====
-  // Paste the EXACT URL of your Make (Integromat) Custom Webhook here:
-  const MAKE_WEBHOOK = "https://hook.eu2.make.com/qp6e8tzwf1or6fy2ifyog53twiwwr25h";
-
-  // ===== Read destination + criteria =====
-  const dest = JSON.parse(localStorage.getItem('wf_destination') || '{}');
-  const crit = JSON.parse(localStorage.getItem('wf_accomCriteria') || '{}');
-
-  if (!dest || (!dest.city && !(dest.lat && dest.lng))) {
-    alert('Please pick a destination first.');
-    location.href = 'module2.html';
-  }
-
-  // Header
-  document.getElementById('destLine').textContent =
-    dest.city
-      ? `Near ${dest.city}${dest.province ? ', ' + dest.province : ''}${dest.region ? ', ' + dest.region : ''}`
-      : `Near your selected pin (${dest.lat?.toFixed(3)}, ${dest.lng?.toFixed(3)})`;
-
-  document.getElementById('crit').innerHTML = `
-    <div><strong>Type:</strong> ${crit.type || 'Any'}</div>
-    <div><strong>Max price:</strong> ${crit.maxPrice ? '≤ ₱' + Number(crit.maxPrice).toLocaleString('en-PH') : 'Any'}</div>
-    <div><strong>Room size:</strong> ${crit.roomSize || 'Any'}</div>
-    <div><strong>Beds:</strong> ${crit.beds || 'Any'}</div>
-  `;
-
-  // Normalize region keys (matches Module 4)
-  function normalizeRegionKey(regionStr=''){
-    const s = (regionStr || '').toLowerCase();
-    if (s.includes('ncr') || s.includes('metro manila')) return 'NCR';
-    if (s.includes('iv-a') || s.includes('4a') || s.includes('calabarzon')) return 'Region 4A';
-    if (s.includes('iv-b') || s.includes('4b') || s.includes('mimaropa')) return 'Region 4B';
-    if (s.includes('region 5') || s.includes('bicol')) return 'Region 5';
-    if (s.includes('region 6') || s.includes('western visayas')) return 'Region 6';
-    if (s.includes('region 7') || s.includes('central visayas')) return 'Region 7';
-    if (s.includes('region 12') || s.includes('soccsksargen')) return 'Region 12';
-    if (/^region\s*\d{1,2}[ab]?$/i.test(regionStr?.trim())) return regionStr.trim();
-    if ((regionStr||'').trim().toUpperCase() === 'NCR') return 'NCR';
-    return regionStr || null;
-  }
-  const regionKey = crit.regionKey || normalizeRegionKey(dest.region);
-
-  const note = document.getElementById('scopeNote');
-  if (regionKey) {
-    note.classList.remove('d-none');
-    note.textContent = `Showing establishments in ${regionKey}.`;
-  }
-
-  // ===== Fetch from Make webhook =====
-  (async function loadStays(){
-    const loading = document.getElementById('loading');
-    const errorBox = document.getElementById('errorBox');
-    try{
-      const url = new URL(MAKE_WEBHOOK);
-      if (regionKey) url.searchParams.set('region', regionKey);
-      if (crit.type) url.searchParams.set('type', crit.type);
-      const res = await fetch(url.toString(), { method:'GET' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const rows = await res.json();
-
-      // Expecting fields from Sheet: Region, Hotel Name, Rating, Category, Validity, Website, Booking URL, Contact, City, Province
-      const cleaned = (rows || []).map(r => ({
-        region: r.Region || r.region || '',
-        name: r['Hotel Name'] || r.name || '',
-        rating: r.Rating || r.rating || '',
-        category: r.Category || r.category || '',
-        validity: r.Validity || r.validity || '',
-        website: r.Website || r.website || '',
-        bookingUrl: r['Booking URL'] || r.bookingUrl || '',
-        contact: r.Contact || r.contact || '',
-        city: r.City || r.city || '',
-        province: r.Province || r.province || ''
-      }))
-      .filter(h => !regionKey || h.region === regionKey)
-      .filter(h => !crit.type || (h.category || '').toLowerCase() === (crit.type || '').toLowerCase());
-
-      renderList(cleaned);
-    }catch(e){
-      console.error(e);
-      errorBox.classList.remove('d-none');
-      loading.classList.add('d-none');
-    }
-  })();
-
-  // ===== Render =====
-  function renderList(items){
-    const loading = document.getElementById('loading');
-    const list = document.getElementById('list');
-    const empty = document.getElementById('empty');
-    loading.classList.add('d-none');
-
-    list.innerHTML = '';
-    if (!items.length){
-      empty.classList.remove('d-none');
-      list.classList.add('d-none');
-      return;
-    }
-    empty.classList.add('d-none');
-    list.classList.remove('d-none');
-
-    const chosen = JSON.parse(localStorage.getItem('wf_stays') || '[]');
-
-    items.forEach(h => {
-      const already = chosen.find(x => x.name === h.name);
-      const col = document.createElement('div');
-      col.className = 'col-12';
-      const validity = h.validity ? new Date(h.validity).toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'2-digit' }) : '—';
-
-      col.innerHTML = `
-        <div class="card p-3">
-          <div class="row g-3 align-items-center">
-            <div class="col-12 col-md-4">
-              <div class="thumb d-flex align-items-center justify-content-center text-muted">
-                <span class="small">No image yet</span>
+          <form id="bookingForm" class="modal-body">
+            <input type="hidden" id="hotelNameHidden">
+            <div class="mb-2"><small class="text-muted" id="hotelContext"></small></div>
+    
+            <div class="row g-2 mb-2">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Status</label>
+                <select id="bkStatus" class="form-select">
+                  <option value="planned">Planned</option>
+                  <option value="booked">Booked</option>
+                  <option value="tentative">Tentative</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label">Check-in</label>
+                <input type="date" id="bkIn" class="form-control">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Check-out</label>
+                <input type="date" id="bkOut" class="form-control">
               </div>
             </div>
-            <div class="col-12 col-md-8">
-              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                <h2 class="h6 mb-0 hotel-name">${h.name}</h2>
-                <span class="badge badge-dot">DOT Accredited</span>
+    
+            <div class="row g-2 mb-2">
+              <div class="col-6">
+                <label class="form-label">Guests</label>
+                <input type="number" id="bkGuests" min="1" class="form-control" value="2">
               </div>
-              <div class="small mt-1">
-                ${(h.rating?`<strong>${h.rating}</strong> • `:'')}${h.category || ''} • ${h.region}
+              <div class="col-6">
+                <label class="form-label">Rooms</label>
+                <input type="number" id="bkRooms" min="1" class="form-control" value="1">
               </div>
-              ${h.validity ? `<div class="small muted">Accreditation valid until: ${validity}</div>` : ''}
-
-              <div class="d-flex gap-2 mt-3 flex-wrap">
-                <a class="btn btn-outline-primary btn-sm"
-                   href="#"
-                   onclick="openAvailability('${encodeURIComponent(h.name)}','${encodeURIComponent(getHotelUrl(h))}'); return false;">
-                  Check availability
-                </a>
-                <button class="btn ${already ? 'btn-success' : 'btn-primary'} btn-sm" data-name="${h.name}">
-                  ${already ? 'Edit details' : 'Add to plan'}
-                </button>
-              </div>
-              ${already ? `<div class="small text-success mt-2">Saved: ${summaryLine(already.booking)}</div>` : ''}
-              ${h.contact ? `<div class="small muted mt-2">Contact: ${h.contact}</div>` : ''}
             </div>
+    
+            <div class="row g-2 mb-2">
+              <div class="col-6">
+                <label class="form-label">Confirm #</label>
+                <input type="text" id="bkConf" class="form-control" placeholder="Optional">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Total Price</label>
+                <input type="number" id="bkPrice" class="form-control" placeholder="₱">
+              </div>
+            </div>
+    
+            <div class="mb-2">
+              <label class="form-label">Booking link</label>
+              <input type="url" id="bkLink" class="form-control" placeholder="https://…">
+            </div>
+    
+            <div class="mb-2">
+              <label class="form-label">Notes</label>
+              <textarea id="bkNotes" class="form-control" rows="2" placeholder="Special requests, etc."></textarea>
+            </div>
+          </form>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" id="saveBookingBtn" class="btn btn-primary">Save to plan</button>
           </div>
         </div>
-      `;
-      col.querySelector('button.btn').addEventListener('click', () => openBookingModal(h));
-      list.appendChild(col);
-    });
-
-    updateSelectionCount();
-    syncNextButton();
-  }
-
-  function getHotelUrl(h){
-    if (h.bookingUrl && h.bookingUrl.trim()) return h.bookingUrl.trim();
-    if (h.website && h.website.trim()) return h.website.trim();
-    return googleSearchUrl(h.name, dest);
-  }
-
-  // ---- Booking capture helpers ----
-  function googleSearchUrl(name, dest){
-    const q = [name, dest?.city, dest?.province, dest?.region, 'Philippines', 'booking'].filter(Boolean).join(' ');
-    return 'https://www.google.com/search?q=' + encodeURIComponent(q);
-  }
-
-  function openAvailability(encodedName, encodedUrl){
-    const name = decodeURIComponent(encodedName);
-    const url  = decodeURIComponent(encodedUrl);
-    localStorage.setItem('wf_pendingBooking', JSON.stringify({ name, url, startedAt: Date.now() }));
-    showBookedBanner(true);
-    window.open(url, '_blank', 'noopener');
-  }
-
-  function showBookedBanner(show){
-    document.getElementById('bookedBanner').style.display = show ? 'flex' : 'none';
-  }
-
-  function getPending(){
-    try { return JSON.parse(localStorage.getItem('wf_pendingBooking') || 'null'); }
-    catch { return null; }
-  }
-
-  window.addEventListener('focus', () => {
-    const pending = getPending();
-    if (!pending) return;
-    setTimeout(() => {
-      const opened = sessionStorage.getItem('wf_pendingOpened');
-      if (!opened) {
-        sessionStorage.setItem('wf_pendingOpened', '1');
-        openPendingModal();
+      </div>
+    </div>
+    
+    <!-- “Done booking?” banner -->
+    <div id="bookedBanner" class="alert alert-primary d-flex align-items-center gap-2"
+         style="position:fixed; left:12px; right:12px; bottom:12px; z-index:1100; display:none; border-radius:12px;">
+      <div>Done booking? Add the details so they appear in your trip summary.</div>
+      <div class="ms-auto">
+        <button class="btn btn-primary btn-sm" onclick="openPendingModal()">I booked it</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="dismissPending()">Dismiss</button>
+      </div>
+    </div>
+    
+    <!-- Next button -->
+    <button id="nextBtn" class="btn btn-primary fab-next" disabled>Next → Transport</button>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // ===== Config =====
+      // Paste the EXACT URL of your Make (Integromat) Custom Webhook here:
+      const MAKE_WEBHOOK = "https://hook.eu2.make.com/qp6e8tzwf1or6fy2ifyog53twiwwr25h";
+    
+      // ===== Read destination + criteria =====
+      const dest = JSON.parse(localStorage.getItem('wf_destination') || '{}');
+      const crit = JSON.parse(localStorage.getItem('wf_accomCriteria') || '{}');
+    
+      if (!dest || (!dest.city && !(dest.lat && dest.lng))) {
+        alert('Please pick a destination first.');
+        location.href = 'module2.html';
       }
-    }, 600);
-  });
-
-  function openPendingModal(){
-    const pending = getPending();
-    if (!pending) { alert('No booking in progress. Click “Check availability” first.'); return; }
-    const hotel = { name: pending.name, category: 'Hotel', region: regionKey };
-    openBookingModal(hotel);
-    setVal('bkLink', pending.url);
-
-    try {
-      const u = new URL(pending.url);
-      const ci = u.searchParams.get('checkin') || u.searchParams.get('arrival') || u.searchParams.get('in');
-      const co = u.searchParams.get('checkout') || u.searchParams.get('departure') || u.searchParams.get('out');
-      if (ci && /^\d{4}-\d{2}-\d{2}$/.test(ci)) setVal('bkIn', ci);
-      if (co && /^\d{4}-\d{2}-\d{2}$/.test(co)) setVal('bkOut', co);
-    } catch {}
-    document.getElementById('bookingModalTitle').textContent = 'Add booking details';
-  }
-
-  function dismissPending(){
-    localStorage.removeItem('wf_pendingBooking');
-    sessionStorage.removeItem('wf_pendingOpened');
-    showBookedBanner(false);
-  }
-
-  // ---- Booking modal logic ----
-  const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
-  const hotelNameHidden = document.getElementById('hotelNameHidden');
-  const hotelContext = document.getElementById('hotelContext');
-
-  function openBookingModal(hotel){
-    hotelNameHidden.value = hotel.name;
-    hotelContext.textContent = `${hotel.name}${hotel.category? ' • ' + hotel.category : ''}${hotel.region? ' • ' + hotel.region : ''}`;
-
-    const arr = JSON.parse(localStorage.getItem('wf_stays') || '[]');
-    const existing = arr.find(x => x.name === hotel.name);
-
-    document.getElementById('bookingModalTitle').textContent = existing ? 'Edit booking details' : 'Add to plan';
-
-    const bk = existing?.booking || {};
-    setVal('bkStatus', bk.status || 'planned');
-    setVal('bkIn', bk.checkIn || '');
-    setVal('bkOut', bk.checkOut || '');
-    setVal('bkGuests', bk.guests ?? 2);
-    setVal('bkRooms', bk.rooms ?? 1);
-    setVal('bkConf', bk.confirmation || '');
-    setVal('bkPrice', bk.totalPrice || '');
-    setVal('bkLink', bk.link || '');
-    setVal('bkNotes', bk.notes || '');
-
-    bookingModal.show();
-  }
-
-  function setVal(id, v){ document.getElementById(id).value = v; }
-  function getVal(id){ return document.getElementById(id).value; }
-  function toInt(v){ const n = parseInt(v,10); return isNaN(n)? null : n; }
-  function toNumberOrNull(v){ const n = parseFloat(v); return isNaN(n)? null : n; }
-
-  document.getElementById('saveBookingBtn').addEventListener('click', () => {
-    const name = hotelNameHidden.value;
-    const booking = {
-      status: getVal('bkStatus'),
-      checkIn: getVal('bkIn'),
-      checkOut: getVal('bkOut'),
-      guests: toInt(getVal('bkGuests')),
-      rooms: toInt(getVal('bkRooms')),
-      confirmation: getVal('bkConf') || null,
-      totalPrice: toNumberOrNull(getVal('bkPrice')),
-      link: getVal('bkLink') || null,
-      notes: getVal('bkNotes') || null
-    };
-
-    const arr = JSON.parse(localStorage.getItem('wf_stays') || '[]');
-    const idx = arr.findIndex(x => x.name === name);
-
-    const base = {
-      name,
-      region: regionKey,
-      addedAt: Date.now(),
-      booking
-    };
-
-    if (idx >= 0) arr[idx] = { ...arr[idx], ...base };
-    else arr.push(base);
-
-    localStorage.setItem('wf_stays', JSON.stringify(arr));
-    bookingModal.hide();
-    updateSelectionCount();
-    syncNextButton();
-  });
-
-  function summaryLine(bk){
-    if (!bk) return 'No details yet';
-    const d = [];
-    if (bk.checkIn && bk.checkOut) d.push(`${bk.checkIn} → ${bk.checkOut}`);
-    if (bk.guests) d.push(`${bk.guests} guest(s)`);
-    if (bk.rooms) d.push(`${bk.rooms} room(s)`);
-    if (bk.confirmation) d.push(`#${bk.confirmation}`);
-    return d.join(' • ');
-  }
-
-  // ---- Selection count & Next button ----
-  function updateSelectionCount(){
-    const count = (JSON.parse(localStorage.getItem('wf_stays') || '[]')).length;
-    document.getElementById('selCount').textContent = count;
-  }
-
-  const nextBtn = document.getElementById('nextBtn');
-  nextBtn.addEventListener('click', () => {
-    const progress = JSON.parse(localStorage.getItem('wf_progress') || '{}');
-    localStorage.setItem('wf_progress', JSON.stringify({ ...progress, m4_done: true }));
-    window.location.href = 'module5.html';
-  });
-
-  function syncNextButton(){
-    const count = (JSON.parse(localStorage.getItem('wf_stays') || '[]')).length;
-    nextBtn.disabled = count === 0;
-  }
-
-  // On load, show banner if pending booking exists
-  (function initPendingUI(){ if (getPending()) showBookedBanner(true); })();
-</script>
-</body>
+    
+      // Header
+      document.getElementById('destLine').textContent =
+        dest.city
+          ? `Near ${dest.city}${dest.province ? ', ' + dest.province : ''}${dest.region ? ', ' + dest.region : ''}`
+          : `Near your selected pin (${dest.lat?.toFixed(3)}, ${dest.lng?.toFixed(3)})`;
+    
+      document.getElementById('crit').innerHTML = `
+        <div><strong>Type:</strong> ${crit.type || 'Any'}</div>
+        <div><strong>Max price:</strong> ${crit.maxPrice ? '≤ ₱' + Number(crit.maxPrice).toLocaleString('en-PH') : 'Any'}</div>
+        <div><strong>Room size:</strong> ${crit.roomSize || 'Any'}</div>
+        <div><strong>Beds:</strong> ${crit.beds || 'Any'}</div>
+      `;
+    
+      // Normalize region keys (matches Module 4)
+      function normalizeRegionKey(regionStr=''){
+        const s = (regionStr || '').toLowerCase();
+        if (s.includes('ncr') || s.includes('metro manila')) return 'NCR';
+        if (s.includes('iv-a') || s.includes('4a') || s.includes('calabarzon')) return 'Region 4A';
+        if (s.includes('iv-b') || s.includes('4b') || s.includes('mimaropa')) return 'Region 4B';
+        if (s.includes('region 5') || s.includes('bicol')) return 'Region 5';
+        if (s.includes('region 6') || s.includes('western visayas')) return 'Region 6';
+        if (s.includes('region 7') || s.includes('central visayas')) return 'Region 7';
+        if (s.includes('region 12') || s.includes('soccsksargen')) return 'Region 12';
+        if (/^region\s*\d{1,2}[ab]?$/i.test(regionStr?.trim())) return regionStr.trim();
+        if ((regionStr||'').trim().toUpperCase() === 'NCR') return 'NCR';
+        return regionStr || null;
+      }
+      const regionKey = crit.regionKey || normalizeRegionKey(dest.region);
+    
+      const note = document.getElementById('scopeNote');
+      if (regionKey) {
+        note.classList.remove('d-none');
+        note.textContent = `Showing establishments in ${regionKey}.`;
+      }
+    
+      // ===== Fetch from Make webhook =====
+      (async function loadStays(){
+        const loading = document.getElementById('loading');
+        const errorBox = document.getElementById('errorBox');
+        try{
+          const url = new URL(MAKE_WEBHOOK);
+          if (regionKey) url.searchParams.set('region', regionKey);
+          if (crit.type) url.searchParams.set('type', crit.type);
+          const res = await fetch(url.toString(), { method:'GET' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const rows = await res.json();
+    
+          // Expecting fields from Sheet: Region, Hotel Name, Rating, Category, Validity, Website, Booking URL, Contact, City, Province
+          const cleaned = (rows || []).map(r => ({
+            region: r.Region || r.region || '',
+            name: r['Hotel Name'] || r.name || '',
+            rating: r.Rating || r.rating || '',
+            category: r.Category || r.category || '',
+            validity: r.Validity || r.validity || '',
+            website: r.Website || r.website || '',
+            bookingUrl: r['Booking URL'] || r.bookingUrl || '',
+            contact: r.Contact || r.contact || '',
+            city: r.City || r.city || '',
+            province: r.Province || r.province || ''
+          }))
+          .filter(h => !regionKey || h.region === regionKey)
+          .filter(h => !crit.type || (h.category || '').toLowerCase() === (crit.type || '').toLowerCase());
+    
+          renderList(cleaned);
+        }catch(e){
+          console.error(e);
+          errorBox.classList.remove('d-none');
+          loading.classList.add('d-none');
+        }
+      })();
+    
+      // ===== Render =====
+      function renderList(items){
+        const loading = document.getElementById('loading');
+        const list = document.getElementById('list');
+        const empty = document.getElementById('empty');
+        loading.classList.add('d-none');
+    
+        list.innerHTML = '';
+        if (!items.length){
+          empty.classList.remove('d-none');
+          list.classList.add('d-none');
+          return;
+        }
+        empty.classList.add('d-none');
+        list.classList.remove('d-none');
+    
+        const chosen = JSON.parse(localStorage.getItem('wf_stays') || '[]');
+    
+        items.forEach(h => {
+          const already = chosen.find(x => x.name === h.name);
+          const col = document.createElement('div');
+          col.className = 'col-12';
+          const validity = h.validity ? new Date(h.validity).toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'2-digit' }) : '—';
+    
+          col.innerHTML = `
+            <div class="card p-3">
+              <div class="row g-3 align-items-center">
+                <div class="col-12 col-md-4">
+                  <div class="thumb d-flex align-items-center justify-content-center text-muted">
+                    <span class="small">No image yet</span>
+                  </div>
+                </div>
+                <div class="col-12 col-md-8">
+                  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <h2 class="h6 mb-0 hotel-name">${h.name}</h2>
+                    <span class="badge badge-dot">DOT Accredited</span>
+                  </div>
+                  <div class="small mt-1">
+                    ${(h.rating?`<strong>${h.rating}</strong> • `:'')}${h.category || ''} • ${h.region}
+                  </div>
+                  ${h.validity ? `<div class="small muted">Accreditation valid until: ${validity}</div>` : ''}
+    
+                  <div class="d-flex gap-2 mt-3 flex-wrap">
+                    <a class="btn btn-outline-primary btn-sm"
+                       href="#"
+                       onclick="openAvailability('${encodeURIComponent(h.name)}','${encodeURIComponent(getHotelUrl(h))}'); return false;">
+                      Check availability
+                    </a>
+                    <button class="btn ${already ? 'btn-success' : 'btn-primary'} btn-sm" data-name="${h.name}">
+                      ${already ? 'Edit details' : 'Add to plan'}
+                    </button>
+                  </div>
+                  ${already ? `<div class="small text-success mt-2">Saved: ${summaryLine(already.booking)}</div>` : ''}
+                  ${h.contact ? `<div class="small muted mt-2">Contact: ${h.contact}</div>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+          col.querySelector('button.btn').addEventListener('click', () => openBookingModal(h));
+          list.appendChild(col);
+        });
+    
+        updateSelectionCount();
+        syncNextButton();
+      }
+    
+      function getHotelUrl(h){
+        if (h.bookingUrl && h.bookingUrl.trim()) return h.bookingUrl.trim();
+        if (h.website && h.website.trim()) return h.website.trim();
+        return googleSearchUrl(h.name, dest);
+      }
+    
+      // ---- Booking capture helpers ----
+      function googleSearchUrl(name, dest){
+        const q = [name, dest?.city, dest?.province, dest?.region, 'Philippines', 'booking'].filter(Boolean).join(' ');
+        return 'https://www.google.com/search?q=' + encodeURIComponent(q);
+      }
+    
+      function openAvailability(encodedName, encodedUrl){
+        const name = decodeURIComponent(encodedName);
+        const url  = decodeURIComponent(encodedUrl);
+        localStorage.setItem('wf_pendingBooking', JSON.stringify({ name, url, startedAt: Date.now() }));
+        showBookedBanner(true);
+        window.open(url, '_blank', 'noopener');
+      }
+    
+      function showBookedBanner(show){
+        document.getElementById('bookedBanner').style.display = show ? 'flex' : 'none';
+      }
+    
+      function getPending(){
+        try { return JSON.parse(localStorage.getItem('wf_pendingBooking') || 'null'); }
+        catch { return null; }
+      }
+    
+      window.addEventListener('focus', () => {
+        const pending = getPending();
+        if (!pending) return;
+        setTimeout(() => {
+          const opened = sessionStorage.getItem('wf_pendingOpened');
+          if (!opened) {
+            sessionStorage.setItem('wf_pendingOpened', '1');
+            openPendingModal();
+          }
+        }, 600);
+      });
+    
+      function openPendingModal(){
+        const pending = getPending();
+        if (!pending) { alert('No booking in progress. Click “Check availability” first.'); return; }
+        const hotel = { name: pending.name, category: 'Hotel', region: regionKey };
+        openBookingModal(hotel);
+        setVal('bkLink', pending.url);
+    
+        try {
+          const u = new URL(pending.url);
+          const ci = u.searchParams.get('checkin') || u.searchParams.get('arrival') || u.searchParams.get('in');
+          const co = u.searchParams.get('checkout') || u.searchParams.get('departure') || u.searchParams.get('out');
+          if (ci && /^\d{4}-\d{2}-\d{2}$/.test(ci)) setVal('bkIn', ci);
+          if (co && /^\d{4}-\d{2}-\d{2}$/.test(co)) setVal('bkOut', co);
+        } catch {}
+        document.getElementById('bookingModalTitle').textContent = 'Add booking details';
+      }
+    
+      function dismissPending(){
+        localStorage.removeItem('wf_pendingBooking');
+        sessionStorage.removeItem('wf_pendingOpened');
+        showBookedBanner(false);
+      }
+    
+      // ---- Booking modal logic ----
+      const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+      const hotelNameHidden = document.getElementById('hotelNameHidden');
+      const hotelContext = document.getElementById('hotelContext');
+    
+      function openBookingModal(hotel){
+        hotelNameHidden.value = hotel.name;
+        hotelContext.textContent = `${hotel.name}${hotel.category? ' • ' + hotel.category : ''}${hotel.region? ' • ' + hotel.region : ''}`;
+    
+        const arr = JSON.parse(localStorage.getItem('wf_stays') || '[]');
+        const existing = arr.find(x => x.name === hotel.name);
+    
+        document.getElementById('bookingModalTitle').textContent = existing ? 'Edit booking details' : 'Add to plan';
+    
+        const bk = existing?.booking || {};
+        setVal('bkStatus', bk.status || 'planned');
+        setVal('bkIn', bk.checkIn || '');
+        setVal('bkOut', bk.checkOut || '');
+        setVal('bkGuests', bk.guests ?? 2);
+        setVal('bkRooms', bk.rooms ?? 1);
+        setVal('bkConf', bk.confirmation || '');
+        setVal('bkPrice', bk.totalPrice || '');
+        setVal('bkLink', bk.link || '');
+        setVal('bkNotes', bk.notes || '');
+    
+        bookingModal.show();
+      }
+    
+      function setVal(id, v){ document.getElementById(id).value = v; }
+      function getVal(id){ return document.getElementById(id).value; }
+      function toInt(v){ const n = parseInt(v,10); return isNaN(n)? null : n; }
+      function toNumberOrNull(v){ const n = parseFloat(v); return isNaN(n)? null : n; }
+    
+      document.getElementById('saveBookingBtn').addEventListener('click', () => {
+        const name = hotelNameHidden.value;
+        const booking = {
+          status: getVal('bkStatus'),
+          checkIn: getVal('bkIn'),
+          checkOut: getVal('bkOut'),
+          guests: toInt(getVal('bkGuests')),
+          rooms: toInt(getVal('bkRooms')),
+          confirmation: getVal('bkConf') || null,
+          totalPrice: toNumberOrNull(getVal('bkPrice')),
+          link: getVal('bkLink') || null,
+          notes: getVal('bkNotes') || null
+        };
+    
+        const arr = JSON.parse(localStorage.getItem('wf_stays') || '[]');
+        const idx = arr.findIndex(x => x.name === name);
+    
+        const base = {
+          name,
+          region: regionKey,
+          addedAt: Date.now(),
+          booking
+        };
+    
+        if (idx >= 0) arr[idx] = { ...arr[idx], ...base };
+        else arr.push(base);
+    
+        localStorage.setItem('wf_stays', JSON.stringify(arr));
+        bookingModal.hide();
+        updateSelectionCount();
+        syncNextButton();
+      });
+    
+      function summaryLine(bk){
+        if (!bk) return 'No details yet';
+        const d = [];
+        if (bk.checkIn && bk.checkOut) d.push(`${bk.checkIn} → ${bk.checkOut}`);
+        if (bk.guests) d.push(`${bk.guests} guest(s)`);
+        if (bk.rooms) d.push(`${bk.rooms} room(s)`);
+        if (bk.confirmation) d.push(`#${bk.confirmation}`);
+        return d.join(' • ');
+      }
+    
+      // ---- Selection count & Next button ----
+      function updateSelectionCount(){
+        const count = (JSON.parse(localStorage.getItem('wf_stays') || '[]')).length;
+        document.getElementById('selCount').textContent = count;
+      }
+    
+      const nextBtn = document.getElementById('nextBtn');
+      nextBtn.addEventListener('click', () => {
+        const progress = JSON.parse(localStorage.getItem('wf_progress') || '{}');
+        localStorage.setItem('wf_progress', JSON.stringify({ ...progress, m4_done: true }));
+        window.location.href = 'module5.html';
+      });
+    
+      function syncNextButton(){
+        const count = (JSON.parse(localStorage.getItem('wf_stays') || '[]')).length;
+        nextBtn.disabled = count === 0;
+      }
+    
+      // On load, show banner if pending booking exists
+      (function initPendingUI(){ if (getPending()) showBookedBanner(true); })();
+    </script>
+  </body>
 </html>
