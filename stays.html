@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>WayFrame | Available Stays</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
-<style>
-  body{background:#f5f7fb}
-  .card{border-radius:16px}
-  .pill{background:#eef5ff;color:#0b5ed7;border:1px solid #cfe2ff;border-radius:999px;padding:.25rem .6rem;font-weight:600}
-  .muted{color:#6b7280}
-  .thumb{width:100%;height:160px;object-fit:cover;border-radius:12px;background:linear-gradient(135deg,#e5ecff,#f5f7fb)}
-  .fab-next{position:fixed; right:18px; bottom:18px; z-index:1050; box-shadow:0 10px 24px rgba(0,0,0,.15); border-radius:999px; padding:.9rem 1.2rem;}
-  .fab-next[disabled]{opacity:.6; pointer-events:none}
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WayFrame | Available Stays</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body{background:#f5f7fb}
+    .card{border-radius:16px}
+    .thumb{height:160px;background:linear-gradient(135deg,#e5ecff,#f5f7fb);border-radius:12px}
+    .muted{color:#6b7280}
+  </style>
 </head>
 <body>
 <div class="container py-3">
@@ -21,23 +18,25 @@
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
     <div>
       <h1 class="h5 mb-1">Available Stays</h1>
-      <div id="destLine" class="muted small"></div>
+      <div id="destLine" class="text-muted small"></div>
     </div>
-    <a href="module4.html" class="pill text-decoration-none">Edit filters</a>
+    <a href="module4.html" class="btn btn-outline-primary btn-sm">Edit filters</a>
   </div>
 
   <div class="row g-3">
+    <!-- Sidebar -->
     <div class="col-12 col-lg-3">
       <div class="card p-3 sticky-top">
         <div class="fw-semibold mb-2">Your criteria</div>
         <div id="crit" class="small"></div>
-        <hr/>
+        <hr>
         <small class="text-muted">Establishments are from your curated DOT list in Google Sheets.</small>
-        <hr/>
+        <hr>
         <div class="small"><strong>Selected:</strong> <span id="selCount">0</span> stay(s)</div>
       </div>
     </div>
 
+    <!-- Results -->
     <div class="col-12 col-lg-9">
       <div id="scopeNote" class="alert alert-info py-2 px-3 small d-none"></div>
 
@@ -48,28 +47,28 @@
 
       <div id="list" class="row g-3 d-none"></div>
       <div id="empty" class="text-center text-muted py-5 d-none">No stays match your destination.</div>
-      <div id="errorBox" class="alert alert-danger mt-3 d-none">
-        Couldn’t load stays. Please try again.
-      </div>
+      <div id="errorBox" class="alert alert-danger mt-3 d-none">Couldn’t load stays. Please try again.</div>
     </div>
   </div>
 </div>
 
-<button id="nextBtn" class="btn btn-primary fab-next" disabled>Next → Transport</button>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // ====== CONFIG: paste your Make webhook ======
-  const MAKE_WEBHOOK = "https://hook.eu2.make.com/qp6e8tzwf1or6fy2ifyog53twiwwr25h";
+  // ---------- CONFIG ----------
+  const MAKE_WEBHOOK = "YOUR_MAKE_WEBHOOK_URL"; // <-- Put your Make webhook here
 
-  // ====== Read destination + criteria from Module 4 ======
-  const dest = JSON.parse(localStorage.getItem('wf_destination') || '{}');
-  const crit = JSON.parse(localStorage.getItem('wf_accomCriteria') || '{}');
+  // ---------- Destination + Criteria (from prior modules) ----------
+  const dest = safeJSON(localStorage.getItem('wf_destination')) || {};
+  const crit = safeJSON(localStorage.getItem('wf_accomCriteria')) || {};
+
+  if (!dest || (!dest.city && !(dest.lat && dest.lng))) {
+    alert('Please pick a destination first.');
+    location.href = 'module2.html';
+  }
 
   document.getElementById('destLine').textContent =
     dest.city
-      ? `Near ${dest.city}${dest.province? ', ' + dest.province : ''}${dest.region? ', ' + dest.region : ''}`
-      : 'Chosen area';
+      ? `Near ${dest.city}${dest.province ? ', ' + dest.province : ''}${dest.region ? ', ' + dest.region : ''}`
+      : `Near your selected pin (${(dest.lat??0).toFixed?.(3) ?? dest.lat}, ${(dest.lng??0).toFixed?.(3) ?? dest.lng})`;
 
   document.getElementById('crit').innerHTML = `
     <div><strong>Type:</strong> ${crit.type || 'Any'}</div>
@@ -78,90 +77,101 @@
     <div><strong>Beds:</strong> ${crit.beds || 'Any'}</div>
   `;
 
-  function normalizeRegionKey(s=''){
-    const t = (s||'').toLowerCase();
-    if (t.includes('ncr') || t.includes('metro manila')) return 'NCR';
-    if (t.includes('iv-a') || t.includes('4a') || t.includes('calabarzon')) return 'Region 4A';
-    if (t.includes('iv-b') || t.includes('4b') || t.includes('mimaropa')) return 'Region 4B';
-    if (t.includes('region 5') || t.includes('bicol')) return 'Region 5';
-    if (t.includes('region 6') || t.includes('western visayas')) return 'Region 6';
-    if (t.includes('region 7') || t.includes('central visayas')) return 'Region 7';
-    if (t.includes('region 12') || t.includes('soccsksargen')) return 'Region 12';
-    if ((s||'').trim().toUpperCase() === 'NCR') return 'NCR';
-    return s || null;
+  // ---------- Helpers ----------
+  function safeJSON(s){ try { return JSON.parse(s); } catch { return null; } }
+  function normalizeRegionKey(regionStr=''){
+    const s = (regionStr || '').toLowerCase();
+    if (s.includes('ncr') || s.includes('metro manila')) return 'NCR';
+    if (s.includes('iv-a') || s.includes('4a') || s.includes('calabarzon')) return 'Region 4A';
+    if (s.includes('iv-b') || s.includes('4b') || s.includes('mimaropa')) return 'Region 4B';
+    if (s.includes('region 5') || s.includes('bicol')) return 'Region 5';
+    if (s.includes('region 6') || s.includes('western visayas')) return 'Region 6';
+    if (s.includes('region 7') || s.includes('central visayas')) return 'Region 7';
+    if (s.includes('region 12') || s.includes('soccsksargen')) return 'Region 12';
+    if (/^region\s*\d{1,2}[ab]?$/i.test(regionStr?.trim())) return regionStr.trim();
+    if ((regionStr||'').trim().toUpperCase() === 'NCR') return 'NCR';
+    return regionStr || null;
   }
   const regionKey = crit.regionKey || normalizeRegionKey(dest.region);
-  const note = document.getElementById('scopeNote');
-  if (regionKey){ note.classList.remove('d-none'); note.textContent = `Showing establishments in ${regionKey}.`; }
 
-  // ====== Fetch stays (robust JSON handling) ======
+  const note = document.getElementById('scopeNote');
+  if (regionKey) {
+    note.classList.remove('d-none');
+    note.textContent = `Showing establishments in ${regionKey}.`;
+  }
+
+  // ---------- Fetch from Make (expects JSON array) ----------
   (async function loadStays(){
     const loading = document.getElementById('loading');
     const errorBox = document.getElementById('errorBox');
+
     try{
       const url = new URL(MAKE_WEBHOOK);
       if (regionKey) url.searchParams.set('region', regionKey);
       if (crit.type) url.searchParams.set('type', crit.type);
 
-      const res = await fetch(url.toString(), { method: 'GET' });
+      const res = await fetch(url.toString(), { method:'GET' });
 
-      // Graceful handling for non-JSON replies
-      const raw = await res.text();
+      // If your Make response is correctly set to application/json, this will work:
       let rows;
-      try { rows = JSON.parse(raw); }
-      catch {
-        console.warn('Non-JSON response from webhook:', raw);
-        throw new Error('Non-JSON response from webhook');
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('application/json')) {
+        rows = await res.json();
+      } else {
+        // Fallback: try to parse text that might actually be a JSON string
+        const txt = await res.text();
+        rows = safeJSON(txt);
       }
-      if (!res.ok) throw new Error('HTTP ' + res.status);
 
-      // Map to our fields
-      const items = (rows || []).map(r => ({
-        region: r.Region || r.region || '',
-        name: r['Hotel Name'] || r.name || '',
-        rating: r.Rating || r.rating || '',
-        category: r.Category || r.category || '',
-        validity: r.Validity || r.validity || '',
-        website: r.Website || r.website || '',
-        bookingUrl: r['Booking URL'] || r.bookingUrl || '',
-        contact: r.Contact || r.contact || '',
-        city: r.City || r.city || '',
-        province: r.Province || r.province || ''
+      if (!res.ok || !Array.isArray(rows)) throw new Error('Bad response');
+
+      // Map incoming fields gracefully
+      const items = rows.map(r => ({
+        region: r.Region ?? r.region ?? '',
+        name: r['Hotel Name'] ?? r.name ?? '',
+        rating: r.Rating ?? r.rating ?? '',
+        category: r.Category ?? r.category ?? '',
+        validity: r.Validity ?? r.validity ?? '',
+        website: r.Website ?? r.website ?? '',
+        bookingUrl: r['Booking URL'] ?? r.bookingUrl ?? '',
+        contact: r.Contact ?? r.contact ?? '',
+        city: r.City ?? r.city ?? '',
+        province: r.Province ?? r.province ?? ''
       }))
       .filter(h => !regionKey || h.region === regionKey)
-      .filter(h => !crit.type || (h.category || '').toLowerCase() === crit.type.toLowerCase());
+      .filter(h => !crit.type || (h.category || '').toLowerCase() === (crit.type || '').toLowerCase());
 
       renderList(items);
-    }catch(err){
-      console.error(err);
+    }catch(e){
+      console.error(e);
       errorBox.classList.remove('d-none');
       loading.classList.add('d-none');
     }
   })();
 
+  // ---------- Render ----------
   function renderList(items){
     const loading = document.getElementById('loading');
     const list = document.getElementById('list');
     const empty = document.getElementById('empty');
-    loading.classList.add('d-none');
 
+    loading.classList.add('d-none');
     list.innerHTML = '';
+
     if (!items.length){
       empty.classList.remove('d-none');
       list.classList.add('d-none');
       return;
     }
+
     empty.classList.add('d-none');
     list.classList.remove('d-none');
 
-    const chosen = JSON.parse(localStorage.getItem('wf_stays') || '[]');
-
     items.forEach(h => {
-      const already = chosen.find(x => x.name === h.name);
       const col = document.createElement('div');
       col.className = 'col-12';
       const validity = h.validity ? new Date(h.validity).toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'2-digit' }) : '—';
-      const url = h.bookingUrl?.trim() || h.website?.trim() || googleSearchUrl(h.name);
+      const url = h.bookingUrl?.trim() || h.website?.trim() || ('https://www.google.com/search?q=' + encodeURIComponent([h.name, h.city, h.province, h.region, 'Philippines', 'booking'].filter(Boolean).join(' ')));
 
       col.innerHTML = `
         <div class="card p-3">
@@ -173,63 +183,37 @@
             </div>
             <div class="col-12 col-md-8">
               <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                <h2 class="h6 mb-0">${h.name}</h2>
-                <span class="badge bg-success-subtle border border-success-subtle text-success-emphasis">DOT Accredited</span>
+                <h2 class="h6 mb-0">${escapeHtml(h.name)}</h2>
+                <span class="badge text-bg-success">DOT Accredited</span>
               </div>
               <div class="small mt-1">
-                ${(h.rating?`<strong>${h.rating}</strong> • `:'')}${h.category || ''} • ${h.region}
+                ${(h.rating?`<strong>${escapeHtml(h.rating)}</strong> • `:'')}${escapeHtml(h.category || '')} • ${escapeHtml(h.region || '')}
               </div>
-              ${h.validity ? `<div class="small muted">Accreditation valid until: ${validity}</div>` : ''}
+              ${h.validity ? `<div class="small muted">Accreditation valid until: ${escapeHtml(validity)}</div>` : ''}
 
               <div class="d-flex gap-2 mt-3 flex-wrap">
                 <a class="btn btn-outline-primary btn-sm" href="${url}" target="_blank" rel="noopener">Check availability</a>
-                <button class="btn ${already ? 'btn-success' : 'btn-primary'} btn-sm" data-name="${h.name}">
-                  ${already ? 'Added' : 'Add to plan'}
-                </button>
               </div>
-              ${h.contact ? `<div class="small muted mt-2">Contact: ${h.contact}</div>` : ''}
+
+              ${h.contact ? `<div class="small muted mt-2">Contact: ${escapeHtml(h.contact)}</div>` : ''}
             </div>
           </div>
         </div>
       `;
-      col.querySelector('button.btn').addEventListener('click', () => addToPlan(h));
       list.appendChild(col);
     });
 
-    updateSelectionCount();
-    syncNextButton();
+    // selection count is local (if you use it later)
+    document.getElementById('selCount').textContent = (JSON.parse(localStorage.getItem('wf_stays') || '[]')).length;
   }
 
-  function googleSearchUrl(name){
-    const q = [name, 'Philippines', 'booking'].join(' ');
-    return 'https://www.google.com/search?q=' + encodeURIComponent(q);
-  }
-
-  function addToPlan(hotel){
-    const arr = JSON.parse(localStorage.getItem('wf_stays') || '[]');
-    if (!arr.find(x => x.name === hotel.name)){
-      arr.push({ name: hotel.name, region: hotel.region, addedAt: Date.now(), booking: null });
-      localStorage.setItem('wf_stays', JSON.stringify(arr));
-      updateSelectionCount();
-      syncNextButton();
-    }
-  }
-
-  function updateSelectionCount(){
-    const count = (JSON.parse(localStorage.getItem('wf_stays') || '[]')).length;
-    document.getElementById('selCount').textContent = count;
-  }
-
-  const nextBtn = document.getElementById('nextBtn');
-  nextBtn.addEventListener('click', () => {
-    const progress = JSON.parse(localStorage.getItem('wf_progress') || '{}');
-    localStorage.setItem('wf_progress', JSON.stringify({ ...progress, m4_done: true }));
-    window.location.href = 'module5.html';
-  });
-
-  function syncNextButton(){
-    const count = (JSON.parse(localStorage.getItem('wf_stays') || '[]')).length;
-    nextBtn.disabled = count === 0;
+  function escapeHtml(s){
+    return String(s ?? '')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#039;');
   }
 </script>
 </body>
